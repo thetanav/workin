@@ -2,6 +2,7 @@
 // Until then, editor/TS may report missing module errors.
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { getAuthUserId } from "@convex-dev/auth/server";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const __convexTypecheck = { mutation, query };
 
@@ -20,6 +21,8 @@ type ActiveNearbyArgs = {
   maxLng: number;
 };
 
+const CHECKIN_TTL_MS = 6 * 60 * 60 * 1000;
+
 export const activeNearby = query({
   args: {
     minLat: v.number(),
@@ -28,12 +31,14 @@ export const activeNearby = query({
     maxLng: v.number(),
   },
   handler: async (ctx: AnyCtx, args: ActiveNearbyArgs) => {
+    const now = Date.now();
     const results = await ctx.db
       .query("checkins")
       .filter((q: any) => q.eq(q.field("active"), true))
       .collect();
 
     return results
+      .filter((c: any) => now - c.startedAt < CHECKIN_TTL_MS)
       .filter(
         (c: any) =>
           c.lat >= args.minLat &&
@@ -57,6 +62,10 @@ export const getByShareId = query({
 
     if (!checkin) return null;
 
+    if (checkin.active && Date.now() - checkin.startedAt >= CHECKIN_TTL_MS) {
+      return null;
+    }
+
     const space = await ctx.db.get(checkin.spaceId);
     const joins = await ctx.db
       .query("joins")
@@ -67,8 +76,8 @@ export const getByShareId = query({
   },
 });
 
+
 type CreateArgs = {
-  userId: string;
   space: {
     name: string;
     city?: string;
@@ -82,7 +91,6 @@ type CreateArgs = {
 
 export const createAtCurrentLocation = mutation({
   args: {
-    userId: v.string(),
     space: v.object({
       name: v.string(),
       city: v.optional(v.string()),
@@ -94,14 +102,23 @@ export const createAtCurrentLocation = mutation({
     note: v.optional(v.string()),
   },
   handler: async (ctx: AnyCtx, args: CreateArgs) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) throw new Error("You must be signed in to check in.");
+    const now = Date.now();
     const existing = await ctx.db
       .query("checkins")
       .withIndex("by_user_active", (q: any) =>
-        q.eq("userId", args.userId).eq("active", true),
+        q.eq("userId", userId).eq("active", true),
       )
       .unique();
 
-    if (existing) throw new Error("You already have an active check-in.");
+    if (existing && now - existing.startedAt < CHECKIN_TTL_MS) {
+      throw new Error("You already have an active check-in.");
+    }
+
+    if (existing && now - existing.startedAt >= CHECKIN_TTL_MS) {
+      await ctx.db.patch(existing._id, { active: false, endedAt: now });
+    }
 
     const existingSpaces = await ctx.db.query("spaces").collect();
     const found = existingSpaces.find(
@@ -118,29 +135,29 @@ export const createAtCurrentLocation = mutation({
     const shareId = randomShareId();
 
     const id = await ctx.db.insert("checkins", {
-      userId: args.userId,
+      userId,
       spaceId,
       lat: args.space.lat,
       lng: args.space.lng,
       note: args.note,
       active: true,
       shareId,
-      startedAt: Date.now(),
+      startedAt: now,
     });
 
     return { id, shareId };
   },
 });
 
-type EndArgs = { userId: string };
-
 export const endMyCheckin = mutation({
-  args: { userId: v.string() },
-  handler: async (ctx: AnyCtx, args: EndArgs) => {
+  args: {},
+  handler: async (ctx: AnyCtx) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) return { ended: false as const };
     const existing = await ctx.db
       .query("checkins")
       .withIndex("by_user_active", (q: any) =>
-        q.eq("userId", args.userId).eq("active", true),
+        q.eq("userId", userId).eq("active", true),
       )
       .unique();
 

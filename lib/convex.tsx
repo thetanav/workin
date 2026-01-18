@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { ConvexReactClient } from "convex/react";
-import { ConvexProvider } from "convex/react";
+import { ConvexAuthNextjsProvider } from "@convex-dev/auth/nextjs";
 
 function readConvexUrl(): string | undefined {
   // `process.env.NEXT_PUBLIC_*` is statically inlined by Next at build time.
@@ -27,20 +27,20 @@ export function ConvexClientProvider({
   );
 
   return (
-    <ConvexProvider client={client}>
+    <ConvexAuthNextjsProvider client={client}>
       {!url && (
         <div className="mx-auto w-full max-w-6xl px-4 pt-4 sm:px-6">
           <div className="rounded-xl border border-border/60 bg-card/40 p-4 text-sm">
             <p className="font-medium">Convex URL missing</p>
             <p className="mt-1 text-muted-foreground">
-              `NEXT_PUBLIC_CONVEX_URL` isn’t available in the client bundle.
+              `NEXT_PUBLIC_CONVEX_URL` isnt available in the client bundle.
               Restart `npm run dev` so Next picks up `.env.local`.
             </p>
           </div>
         </div>
       )}
       {children}
-    </ConvexProvider>
+    </ConvexAuthNextjsProvider>
   );
 }
 
