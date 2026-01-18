@@ -5,7 +5,6 @@ import Link from "next/link";
 
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { useAuthActions } from "@convex-dev/auth/react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -33,11 +32,9 @@ export function CheckinPanel({
   coords: { lat: number; lng: number };
 }) {
   const convexReady = useConvexConfigured();
-  const { signIn, signOut } = useAuthActions();
 
   const create = useMutation(api.checkins.createAtCurrentLocation as any);
   const end = useMutation(api.checkins.endMyCheckin as any);
-  const userId = useQuery(api.authHelpers.currentUserId as any);
 
   const [place, setPlace] = React.useState("Current spot");
   const [city, setCity] = React.useState("");
@@ -47,7 +44,6 @@ export function CheckinPanel({
   const [creating, setCreating] = React.useState(false);
 
   const canUse = convexReady && typeof create === "function";
-  const authed = userId !== undefined && userId !== null;
 
   async function onCreate() {
     if (!canUse) {
@@ -103,10 +99,8 @@ export function CheckinPanel({
               Visible to nearby people + shareable link.
             </p>
           </div>
-          <Badge
-            variant={canUse ? (authed ? "secondary" : "outline") : "destructive"}
-          >
-            {!canUse ? "convex not set" : authed ? "signed in" : "guest"}
+          <Badge variant={canUse ? "secondary" : "destructive"}>
+            {!canUse ? "convex not set" : "ready"}
           </Badge>
         </div>
 
@@ -129,26 +123,9 @@ export function CheckinPanel({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          {!authed ? (
-            <Button
-              onClick={() => signIn("google")}
-              disabled={!canUse}
-              variant="secondary"
-            >
-              Sign in with Google
-            </Button>
-          ) : (
-            <Button
-              onClick={() => signOut()}
-              disabled={!canUse}
-              variant="outline"
-            >
-              Sign out
-            </Button>
-          )}
+          <div className="flex flex-wrap items-center gap-2">
+            <Button onClick={onCreate} disabled={!canUse || creating || !!shareId}>
 
-          <Button onClick={onCreate} disabled={!canUse || !authed || creating || !!shareId}>
             {shareId ? "Checked in" : creating ? "Checking in..." : "Check in now"}
           </Button>
           <Button

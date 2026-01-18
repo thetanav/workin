@@ -2,7 +2,6 @@
 // Until then, editor/TS may report missing module errors.
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { getAuthUserId } from "@convex-dev/auth/server";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const __convexTypecheck = { mutation, query };
 
@@ -102,8 +101,7 @@ export const createAtCurrentLocation = mutation({
     note: v.optional(v.string()),
   },
   handler: async (ctx: AnyCtx, args: CreateArgs) => {
-    const userId = await getAuthUserId(ctx);
-    if (userId === null) throw new Error("You must be signed in to check in.");
+    const userId = "guest";
     const now = Date.now();
     const existing = await ctx.db
       .query("checkins")
@@ -152,8 +150,7 @@ export const createAtCurrentLocation = mutation({
 export const endMyCheckin = mutation({
   args: {},
   handler: async (ctx: AnyCtx) => {
-    const userId = await getAuthUserId(ctx);
-    if (userId === null) return { ended: false as const };
+    const userId = "guest";
     const existing = await ctx.db
       .query("checkins")
       .withIndex("by_user_active", (q: any) =>

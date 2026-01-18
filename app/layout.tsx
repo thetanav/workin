@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { IBM_Plex_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ConvexClientProvider } from "@/lib/convex";
-import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import { Toaster } from "@/components/ui/sonner";
 
 const sans = IBM_Plex_Sans({
@@ -30,12 +29,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${sans.variable} ${mono.variable} antialiased`}>
-        <ConvexAuthNextjsServerProvider>
-          <ConvexClientProvider>
-            {children}
-            <Toaster richColors theme="dark" />
-          </ConvexClientProvider>
-        </ConvexAuthNextjsServerProvider>
+        <ConvexClientProvider>
+          {children}
+          <Toaster richColors theme="dark" />
+        </ConvexClientProvider>
       </body>
     </html>
   );

@@ -8,8 +8,6 @@
  * @module
  */
 
-import type * as auth from "../auth.js";
-import type * as authHelpers from "../authHelpers.js";
 import type * as checkins from "../checkins.js";
 import type * as http from "../http.js";
 import type * as joins from "../joins.js";
@@ -23,8 +21,6 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  auth: typeof auth;
-  authHelpers: typeof authHelpers;
   checkins: typeof checkins;
   http: typeof http;
   joins: typeof joins;

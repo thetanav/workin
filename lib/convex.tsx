@@ -1,8 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ConvexReactClient } from "convex/react";
-import { ConvexAuthNextjsProvider } from "@convex-dev/auth/nextjs";
+import { ConvexReactClient, ConvexProvider } from "convex/react";
 
 function readConvexUrl(): string | undefined {
   // `process.env.NEXT_PUBLIC_*` is statically inlined by Next at build time.
@@ -27,7 +26,7 @@ export function ConvexClientProvider({
   );
 
   return (
-    <ConvexAuthNextjsProvider client={client}>
+    <ConvexProvider client={client}>
       {!url && (
         <div className="mx-auto w-full max-w-6xl px-4 pt-4 sm:px-6">
           <div className="rounded-xl border border-border/60 bg-card/40 p-4 text-sm">
@@ -40,7 +39,7 @@ export function ConvexClientProvider({
         </div>
       )}
       {children}
-    </ConvexAuthNextjsProvider>
+    </ConvexProvider>
   );
 }
 
