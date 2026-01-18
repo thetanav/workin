@@ -1,19 +1,12 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans, JetBrains_Mono } from "next/font/google";
-import "./globals.css";
-import { ConvexClientProvider } from "@/lib/convex";
+import { ClerkProvider } from '@clerk/nextjs'
+import { Inter } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
+import ConvexClientProvider from "@/components/app/convex-clerk";
+import "./globals.css";
 
-const sans = IBM_Plex_Sans({
-  variable: "--font-ibm-plex-sans",
+const sans = Inter({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
-});
-
-const mono = JetBrains_Mono({
-  variable: "--font-jetbrains-mono",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
@@ -26,13 +19,16 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
   return (
     <html lang="en" className="dark">
-      <body className={`${sans.variable} ${mono.variable} antialiased`}>
-        <ConvexClientProvider>
-          {children}
-          <Toaster richColors theme="dark" />
-        </ConvexClientProvider>
+      <body className={`${sans.className} antialiased`}>
+        <ClerkProvider>
+          <ConvexClientProvider>
+            {children}
+          </ConvexClientProvider>
+        </ClerkProvider>
+        <Toaster richColors theme="dark" />
       </body>
     </html>
   );

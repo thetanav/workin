@@ -36,6 +36,10 @@ export const upsert = mutation({
     skills: v.optional(v.array(v.string())),
   },
   handler: async (ctx: AnyCtx, args: UpsertArgs) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity || identity.subject !== args.userId) {
+      throw new Error("Unauthorized profile upsert");
+    }
     // MVP: store userId on profile document.
     const existing = await ctx.db
       .query("profiles")
@@ -60,5 +64,38 @@ export const upsert = mutation({
 
     const id = await ctx.db.insert("profiles", payload as any);
     return { id };
+  },
+});
+
+export const store = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Called profiles.store without authentication present");
+    }
+
+    const existing = await ctx.db
+      .query("profiles")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
+      .unique();
+
+    const userId = identity.subject;
+    const now = Date.now();
+
+    const patch = {
+      userId,
+      tokenIdentifier: identity.tokenIdentifier,
+      name: identity.name ?? "Anonymous",
+      avatarUrl: identity.pictureUrl,
+      updatedAt: now,
+    };
+
+    if (existing) {
+      await ctx.db.patch(existing._id, patch);
+      return existing._id;
+    }
+
+    return await ctx.db.insert("profiles", patch);
   },
 });

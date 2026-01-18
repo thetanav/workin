@@ -3,7 +3,12 @@ import { v } from "convex/values";
 
 export default defineSchema({
   profiles: defineTable({
-    userId: v.string(),
+    // Clerk user id, e.g. "user_..."
+    userId: v.optional(v.string()),
+
+    // Stable identifier for the JWT subject (works across providers)
+    tokenIdentifier: v.optional(v.string()),
+
     handle: v.optional(v.string()),
     name: v.string(),
     bio: v.optional(v.string()),
@@ -13,7 +18,8 @@ export default defineSchema({
     updatedAt: v.number(),
   })
     .index("by_user", ["userId"])
-    .index("by_handle", ["handle"]),
+    .index("by_handle", ["handle"])
+    .index("by_token", ["tokenIdentifier"]),
 
   spaces: defineTable({
     name: v.string(),

@@ -9,11 +9,14 @@ import { CheckinPanel } from "@/components/app/checkin-panel";
 import { ConvexNotice } from "@/components/app/convex-notice";
 import { useMapCheckins } from "@/components/app/use-map-checkins";
 import { useRouter } from "next/navigation";
+import AuthComp from "@/components/app/auth-comp";
+import { useUser } from "@clerk/nextjs";
 
 export default function Home() {
   const [coords, setCoords] = React.useState<{ lat: number; lng: number } | null>(
     null,
   );
+  const { user } = useUser();
 
   const router = useRouter();
   const { checkins } = useMapCheckins(coords ?? { lat: 0, lng: 0 });
@@ -24,7 +27,8 @@ export default function Home() {
       subtitle="Check in at your current spot. Nearby builders can join you, or you can share a link."
     >
       <ConvexNotice />
-
+      {user?.fullName}
+      <AuthComp />
       {!coords ? (
         <LocationGate onReady={setCoords} />
       ) : (
