@@ -6,7 +6,6 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { MapPin, Search, Map as MapIcon } from "lucide-react";
 
-import { Shell } from "@/components/app/shell";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -26,7 +25,7 @@ import { cn } from "@/lib/utils";
 export default function SpacesPage() {
   const [city, setCity] = React.useState("");
   const spaces = useQuery(
-    api.spaces.byCity,
+    api.checkins.byCity,
     city.trim().length ? { city: city.trim() } : "skip",
   );
 
@@ -35,10 +34,7 @@ export default function SpacesPage() {
   const { checkins } = useMapCheckins(mapCenter);
 
   return (
-    <Shell
-      title="Spaces"
-      subtitle="Find work spaces by city or explore the map."
-    >
+    <div className="p-6">
       <div className="grid gap-6">
         <Card className="border-border/60 bg-card/40 p-5">
           <div className="flex flex-col gap-4">
@@ -48,7 +44,7 @@ export default function SpacesPage() {
                 <p className="text-sm font-medium">Search by city</p>
               </div>
               <div className="flex items-center gap-2">
-                 <Button
+                <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setShowMap(true)}
@@ -65,17 +61,13 @@ export default function SpacesPage() {
               onChange={(e) => setCity(e.target.value)}
               placeholder="e.g. Berlin"
             />
-            
+
             <div className="mt-2">
-              {!spaces ? (
-                <p className="text-sm text-muted-foreground">
-                  {city.trim().length ? "Loading..." : "Enter a city to search."}
-                </p>
-              ) : spaces.length === 0 ? (
+              {!spaces || spaces.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No spaces yet.</p>
               ) : (
                 <div className="grid gap-2">
-                  {spaces.map((s) => (
+                  {spaces.map((s: any) => (
                     <Card
                       key={String(s._id)}
                       className="border-border/60 bg-background/40 p-4"
@@ -129,16 +121,16 @@ export default function SpacesPage() {
               </div>
             </div>
             <div className="relative h-full w-full">
-               {/* Re-using MapView but ignoring onCheckin for now or implementing redirect */}
-               <MapView
+              {/* Re-using MapView but ignoring onCheckin for now or implementing redirect */}
+              <MapView
                 center={mapCenter}
                 checkins={checkins}
                 onCheckin={(shareId) => window.location.href = `/c/${shareId}`}
-               />
+              />
             </div>
           </div>
         </DialogContent>
       </Dialog>
-    </Shell>
+    </div>
   );
 }

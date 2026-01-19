@@ -106,6 +106,10 @@ export function CheckinPanel({
             )}
           </div>
 
+          <p className="text-sm text-muted-foreground">
+            {coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}
+          </p>
+
           {!shareId ? (
             <div className="grid gap-4">
               <div className="grid gap-2">
@@ -146,8 +150,8 @@ export function CheckinPanel({
 
           <div className="flex flex-col gap-2">
             {!shareId ? (
-              <Button 
-                onClick={onCreate} 
+              <Button
+                onClick={onCreate}
                 disabled={!canUse || creating}
                 className="w-full shadow-lg shadow-primary/20"
               >

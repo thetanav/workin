@@ -53,17 +53,21 @@ export function useCurrentLocation() {
 export function LocationGate({
   title = "Enable Location Access",
   onReady,
+  onError,
 }: {
   title?: string;
   onReady: (coords: { lat: number; lng: number }) => void;
+  onError?: (message: string) => void;
 }) {
   const { state, request } = useCurrentLocation();
 
   React.useEffect(() => {
     if (state.status === "ready") {
       onReady({ lat: state.lat, lng: state.lng });
+    } else if (state.status === "denied") {
+      onError?.(state.message);
     }
-  }, [state, onReady]);
+  }, [state, onReady, onError]);
 
   return (
     <Card className="relative overflow-hidden border-border/40 bg-card/30 backdrop-blur-md">
@@ -82,13 +86,6 @@ export function LocationGate({
             WorkIn uses your real-time location to show you nearby builders and let others find you. Your location is only shared when you check in.
           </p>
         </div>
-
-        {state.status === "denied" && (
-          <div className="flex items-center gap-2 rounded-lg bg-destructive/10 px-4 py-2 text-sm text-destructive border border-destructive/20">
-            <ShieldCheck size={16} />
-            <p>{state.message}</p>
-          </div>
-        )}
 
         <div className="flex flex-col items-center gap-4">
           <Button 
