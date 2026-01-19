@@ -11,7 +11,7 @@ general
 ui 
 - there will be there pages, settings, history for spaces joined, search
 - / search page user will have a map for the city the user searched and show marks on the map where users are building or learing. now user can open that place in a new page with /l/long/lat to see how many peoples are there.
-- /create page is for user to create a status for i am here working come collaborate there, user can only add the status to the place they are using the gps, add a descirption like "i am here building web apps, learning react native"
+- /create page is for user to create a status for i am here working come collaborate there, add a descirption like "i am here building web apps, learning react native"
 
 rules
 - follow the convex/schema.ts

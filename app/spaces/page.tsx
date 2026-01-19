@@ -24,10 +24,8 @@ import { cn } from "@/lib/utils";
 
 export default function SpacesPage() {
   const [city, setCity] = React.useState("");
-  const spaces = useQuery(
-    api.checkins.byCity,
-    city.trim().length ? { city: city.trim() } : "skip",
-  );
+  const spaces = null;
+
 
   const [showMap, setShowMap] = React.useState(false);
   const [mapCenter, setMapCenter] = React.useState(cities[3]); // Default to Berlin
@@ -63,31 +61,9 @@ export default function SpacesPage() {
             />
 
             <div className="mt-2">
-              {!spaces || spaces.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No spaces yet.</p>
-              ) : (
-                <div className="grid gap-2">
-                  {spaces.map((s: any) => (
-                    <Card
-                      key={String(s._id)}
-                      className="border-border/60 bg-background/40 p-4"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="text-sm font-medium">{s.name}</p>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <MapPin className="h-3 w-3" />
-                            <span>{[s.city, s.country].filter(Boolean).join(", ")}</span>
-                          </div>
-                        </div>
-                        <Button asChild size="sm" variant="secondary">
-                          <Link href={`/spaces/${String(s._id)}`}>Open</Link>
-                        </Button>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              )}
+              <p className="text-sm text-muted-foreground">
+                Spaces directory is not wired up yet (schema only has users + checkins).
+              </p>
             </div>
           </div>
         </Card>

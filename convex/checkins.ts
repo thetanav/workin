@@ -42,15 +42,17 @@ export const activeNearby = query({
 export const getById = query({
   args: { id: v.string() },
   handler: async (ctx: QueryCtx, args) => {
-    const checkin = await ctx.db
-      .query("checkins")
-      .filter((q) => q.eq("_id", args.id))
-      .unique();
+    // _id is an Id<"checkins">, but we accept string so we can use it in URLs easily.
+    // Use the safe getter instead of filtering on _id.
+    const checkin = await ctx.db.get(args.id as any);
 
-    if (!checkin) return null;
+    if (!checkin) return { checkin: null };
+
+    // Defensive check: this endpoint is for checkins only.
+    if (!("startedAt" in checkin)) return { checkin: null };
 
     if (Date.now() - checkin.startedAt >= CHECKIN_TTL_MS) {
-      return null;
+      return { checkin: null };
     }
 
     return { checkin };

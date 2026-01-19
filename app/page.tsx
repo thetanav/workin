@@ -5,11 +5,26 @@ import * as React from "react";
 import { LocationGate } from "@/components/app/location";
 import { CheckinPanel } from "@/components/app/checkin-panel";
 import { MapView } from "@/components/app/map-view";
+import { useMapCheckins } from "@/components/app/use-map-checkins";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ShieldCheck, MapPin } from "lucide-react";
+
+function MapWithCheckins({ center }: { center: { lat: number; lng: number } }) {
+  const { checkins } = useMapCheckins(center);
+
+  return (
+    <MapView
+      center={center}
+      checkins={checkins}
+      onCheckin={(shareId) => {
+        window.location.href = `/c/${shareId}`;
+      }}
+    />
+  );
+}
 
 export default function Home() {
   const [coords, setCoords] = React.useState<{ lat: number; lng: number } | null>(
@@ -27,9 +42,11 @@ export default function Home() {
           <LocationGate onReady={setCoords} onError={setLocationError} />
         </div>
       ) : (
-        <div className="w-full flex gap-2 items-center justify-center mt-8">
-          <MapView center={coords} checkins={[]} />
-          <CheckinPanel coords={coords} />
+        <div className="hero-grid">
+          <div className="w-full flex flex-col md:flex-row gap-4 items-stretch justify-center mt-6 p-4 md:p-8">
+            <MapWithCheckins center={coords} />
+            <CheckinPanel coords={coords} />
+          </div>
         </div>
       )}
 

@@ -26,7 +26,7 @@ export default function Navbar() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-lg transition-transform">
                 <Map size={18} fill="currentColor" fillOpacity={0.2} />
               </div>
-              <span className="text-xl font-bold tracking-tight">WorkIn</span>
+              <span className="display-font text-xl font-bold tracking-tight">WorkIn</span>
             </Link>
             <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors">
               beta
