@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
-import Providers from "@/components/app/providers";
+import { ClerkProvider } from "@clerk/nextjs";
+import ConvexClientProvider from "@/components/app/providers";
 
 const sans = Inter({
   subsets: ["latin"],
@@ -22,9 +23,11 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${sans.className} antialiased`}>
-        <Providers>
-          {children}
-        </Providers>
+        <ClerkProvider>
+          <ConvexClientProvider>
+            {children}
+          </ConvexClientProvider>
+        </ClerkProvider>
         <Toaster richColors theme="dark" />
       </body>
     </html>
