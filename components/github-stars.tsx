@@ -14,11 +14,12 @@ export function GitHubStars({ repo, stargazersCount }: GitHubStarsProps) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button className="gap-1.5 pr-1.5 pl-2" variant="ghost" asChild>
+        <Button className="gap-1.5 pr-1.5 pl-2 w-fit flex" variant="ghost">
           <a
             href={`https://github.com/${repo}`}
             target="_blank"
             rel="noopener noreferrer"
+            className="flex gap-2 items-center justify-center"
           >
             <svg className="-translate-y-px" viewBox="0 0 24 24">
               <path
