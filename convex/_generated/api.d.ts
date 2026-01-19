@@ -10,9 +10,7 @@
 
 import type * as checkins from "../checkins.js";
 import type * as http from "../http.js";
-import type * as joins from "../joins.js";
-import type * as profiles from "../profiles.js";
-import type * as spaces from "../spaces.js";
+import type * as users from "../users.js";
 
 import type {
   ApiFromModules,
@@ -23,9 +21,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   checkins: typeof checkins;
   http: typeof http;
-  joins: typeof joins;
-  profiles: typeof profiles;
-  spaces: typeof spaces;
+  users: typeof users;
 }>;
 
 /**

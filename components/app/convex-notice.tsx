@@ -2,11 +2,8 @@
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useConvexConfigured } from "@/lib/convex";
 
 export function ConvexNotice() {
-  const configured = useConvexConfigured();
-  if (configured) return null;
 
   return (
     <Card className="mb-6 border-border/60 bg-card/40 p-5">

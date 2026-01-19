@@ -14,8 +14,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
-import { useConvexConfigured } from "@/lib/convex";
-
 type CreateResponse = { id: string; shareId: string };
 
 type SpaceInput = {
@@ -32,9 +30,8 @@ export function CheckinPanel({
 }: {
   coords: { lat: number; lng: number };
 }) {
-  const convexReady = useConvexConfigured();
   const { isLoaded, userId } = useAuth();
-  
+
   const activeCheckin = useQuery(api.checkins.getMyActiveCheckin);
   const create = useMutation(api.checkins.createAtCurrentLocation);
   const end = useMutation(api.checkins.endMyCheckin);
@@ -42,7 +39,7 @@ export function CheckinPanel({
   const [place, setPlace] = React.useState("Current spot");
   const [city, setCity] = React.useState("");
   const [note, setNote] = React.useState("");
-  
+
   // Initialize with activeCheckin shareId if available
   const [shareId, setShareId] = React.useState<string | null>(null);
   const [creating, setCreating] = React.useState(false);
@@ -147,10 +144,10 @@ export function CheckinPanel({
           </div>
         ) : (
           <div className="rounded-md border border-border/60 bg-background/50 p-4">
-             <p className="text-sm font-medium text-green-500">You are checked in!</p>
-             <p className="text-xs text-muted-foreground mt-1">
-               Share ID: <span className="font-mono">{shareId}</span>
-             </p>
+            <p className="text-sm font-medium text-green-500">You are checked in!</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Share ID: <span className="font-mono">{shareId}</span>
+            </p>
           </div>
         )}
 

@@ -6,10 +6,10 @@ import { Shell } from "@/components/app/shell";
 import { LocationGate } from "@/components/app/location";
 import { MapView } from "@/components/app/map-view";
 import { CheckinPanel } from "@/components/app/checkin-panel";
-import { ConvexNotice } from "@/components/app/convex-notice";
 import { useMapCheckins } from "@/components/app/use-map-checkins";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
+import AuthComp from "@/components/app/auth-comp";
 
 export default function Home() {
   const [coords, setCoords] = React.useState<{ lat: number; lng: number } | null>(
@@ -25,8 +25,7 @@ export default function Home() {
       title="Find a place to work, together"
       subtitle="Check in at your current spot. Nearby builders can join you, or you can share a link."
     >
-      <ConvexNotice />
-      {user?.fullName}
+      <AuthComp />
       {!coords ? (
         <LocationGate onReady={setCoords} />
       ) : (
