@@ -1,7 +1,7 @@
 // Note: Convex generates `convex/_generated/*` after you run `npx convex dev`.
 // Until then, editor/TS may report missing module errors.
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, QueryCtx, MutationCtx } from "./_generated/server";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const __convexTypecheck = { mutation, query };
 
@@ -10,8 +10,6 @@ function randomShareId(): string {
     Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 10)
   );
 }
-
-type AnyCtx = any;
 
 type ActiveNearbyArgs = {
   minLat: number;
@@ -29,17 +27,17 @@ export const activeNearby = query({
     minLng: v.number(),
     maxLng: v.number(),
   },
-  handler: async (ctx: AnyCtx, args: ActiveNearbyArgs) => {
+  handler: async (ctx: QueryCtx, args: ActiveNearbyArgs) => {
     const now = Date.now();
     const results = await ctx.db
       .query("checkins")
-      .filter((q: any) => q.eq(q.field("active"), true))
+      .filter((q) => q.eq(q.field("active"), true))
       .collect();
 
     return results
-      .filter((c: any) => now - c.startedAt < CHECKIN_TTL_MS)
+      .filter((c) => now - c.startedAt < CHECKIN_TTL_MS)
       .filter(
-        (c: any) =>
+        (c) =>
           c.lat >= args.minLat &&
           c.lat <= args.maxLat &&
           c.lng >= args.minLng &&
@@ -53,10 +51,10 @@ type GetByShareArgs = { shareId: string };
 
 export const getByShareId = query({
   args: { shareId: v.string() },
-  handler: async (ctx: AnyCtx, args: GetByShareArgs) => {
+  handler: async (ctx: QueryCtx, args: GetByShareArgs) => {
     const checkin = await ctx.db
       .query("checkins")
-      .withIndex("by_share", (q: any) => q.eq("shareId", args.shareId))
+      .withIndex("by_share", (q) => q.eq("shareId", args.shareId))
       .unique();
 
     if (!checkin) return null;
@@ -68,13 +66,38 @@ export const getByShareId = query({
     const space = await ctx.db.get(checkin.spaceId);
     const joins = await ctx.db
       .query("joins")
-      .withIndex("by_checkin", (q: any) => q.eq("checkinId", checkin._id))
+      .withIndex("by_checkin", (q) => q.eq("checkinId", checkin._id))
       .collect();
 
-    return { checkin, space, joinsCount: joins.length };
+    const profile = await ctx.db
+      .query("profiles")
+      .withIndex("by_user", (q) => q.eq("userId", checkin.userId))
+      .unique();
+
+    return { checkin, space, joinsCount: joins.length, profile };
   },
 });
 
+
+export const getMyActiveCheckin = query({
+  args: {},
+  handler: async (ctx: QueryCtx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return null;
+    const userId = identity.subject;
+    const checkin = await ctx.db
+      .query("checkins")
+      .withIndex("by_user_active", (q) =>
+        q.eq("userId", userId).eq("active", true),
+      )
+      .unique();
+
+    if (checkin && Date.now() - checkin.startedAt >= CHECKIN_TTL_MS) {
+      return null;
+    }
+    return checkin;
+  },
+});
 
 type CreateArgs = {
   space: {
@@ -100,12 +123,15 @@ export const createAtCurrentLocation = mutation({
     }),
     note: v.optional(v.string()),
   },
-  handler: async (ctx: AnyCtx, args: CreateArgs) => {
-    const userId = "guest";
+  handler: async (ctx: MutationCtx, args: CreateArgs) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
+    const userId = identity.subject;
+
     const now = Date.now();
     const existing = await ctx.db
       .query("checkins")
-      .withIndex("by_user_active", (q: any) =>
+      .withIndex("by_user_active", (q) =>
         q.eq("userId", userId).eq("active", true),
       )
       .unique();
@@ -120,7 +146,7 @@ export const createAtCurrentLocation = mutation({
 
     const existingSpaces = await ctx.db.query("spaces").collect();
     const found = existingSpaces.find(
-      (s: any) =>
+      (s) =>
         s.name === args.space.name &&
         Math.abs(s.lat - args.space.lat) < 0.0005 &&
         Math.abs(s.lng - args.space.lng) < 0.0005,
@@ -149,11 +175,14 @@ export const createAtCurrentLocation = mutation({
 
 export const endMyCheckin = mutation({
   args: {},
-  handler: async (ctx: AnyCtx) => {
-    const userId = "guest";
+  handler: async (ctx: MutationCtx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
+    const userId = identity.subject;
+
     const existing = await ctx.db
       .query("checkins")
-      .withIndex("by_user_active", (q: any) =>
+      .withIndex("by_user_active", (q) =>
         q.eq("userId", userId).eq("active", true),
       )
       .unique();

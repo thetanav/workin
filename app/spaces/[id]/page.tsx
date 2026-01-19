@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 
 import { Shell } from "@/components/app/shell";
 import { Card } from "@/components/ui/card";
@@ -12,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 export default function SpaceDetailPage({ params }: { params: { id: string } }) {
-  const data = useQuery(api.spaces.get, { id: params.id as any });
+  const data = useQuery(api.spaces.get, { id: params.id as Id<"spaces"> });
 
   return (
     <Shell
@@ -47,7 +48,7 @@ export default function SpaceDetailPage({ params }: { params: { id: string } }) 
               {data.active.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No one checked in.</p>
               ) : (
-                data.active.map((c: any) => (
+                data.active.map((c) => (
                   <Card
                     key={String(c._id)}
                     className="border-border/60 bg-background/40 p-4"

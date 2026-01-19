@@ -1,7 +1,5 @@
-import { mutation, query } from "./_generated/server";
+import { mutation, query, QueryCtx, MutationCtx } from "./_generated/server";
 import { v } from "convex/values";
-
-type AnyCtx = any;
 
 type GetArgs = { userId: string };
 
@@ -11,16 +9,32 @@ type UpsertArgs = {
   name: string;
   bio?: string;
   avatarUrl?: string;
+  github?: string;
+  twitter?: string;
   links?: string[];
   skills?: string[];
 };
 
-export const getByUserId = query({
-  args: { userId: v.string() },
-  handler: async (ctx: AnyCtx, args: GetArgs) => {
+export const getMe = query({
+  args: {},
+  handler: async (ctx: QueryCtx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return null;
+    }
     return await ctx.db
       .query("profiles")
-      .withIndex("by_user", (q: any) => q.eq("userId", args.userId))
+      .withIndex("by_user", (q) => q.eq("userId", identity.subject))
+      .unique();
+  },
+});
+
+export const getByUserId = query({
+  args: { userId: v.string() },
+  handler: async (ctx: QueryCtx, args: GetArgs) => {
+    return await ctx.db
+      .query("profiles")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .unique();
   },
 });
@@ -32,10 +46,12 @@ export const upsert = mutation({
     name: v.string(),
     bio: v.optional(v.string()),
     avatarUrl: v.optional(v.string()),
+    github: v.optional(v.string()),
+    twitter: v.optional(v.string()),
     links: v.optional(v.array(v.string())),
     skills: v.optional(v.array(v.string())),
   },
-  handler: async (ctx: AnyCtx, args: UpsertArgs) => {
+  handler: async (ctx: MutationCtx, args: UpsertArgs) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity || identity.subject !== args.userId) {
       throw new Error("Unauthorized profile upsert");
@@ -43,7 +59,7 @@ export const upsert = mutation({
     // MVP: store userId on profile document.
     const existing = await ctx.db
       .query("profiles")
-      .withIndex("by_user", (q: any) => q.eq("userId", args.userId))
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .unique();
 
     const payload = {
@@ -52,6 +68,8 @@ export const upsert = mutation({
       name: args.name,
       bio: args.bio,
       avatarUrl: args.avatarUrl,
+      github: args.github,
+      twitter: args.twitter,
       links: args.links,
       skills: args.skills,
       updatedAt: Date.now(),
@@ -62,14 +80,14 @@ export const upsert = mutation({
       return { id: existing._id };
     }
 
-    const id = await ctx.db.insert("profiles", payload as any);
+    const id = await ctx.db.insert("profiles", payload);
     return { id };
   },
 });
 
 export const store = mutation({
   args: {},
-  handler: async (ctx) => {
+  handler: async (ctx: MutationCtx) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new Error("Called profiles.store without authentication present");

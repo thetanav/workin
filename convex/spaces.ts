@@ -1,36 +1,35 @@
-import { query } from "./_generated/server";
+import { query, QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
-
-type AnyCtx = any;
+import { Id } from "./_generated/dataModel";
 
 type ByCityArgs = { city: string };
 
 export const byCity = query({
   args: { city: v.string() },
-  handler: async (ctx: AnyCtx, args: ByCityArgs) => {
+  handler: async (ctx: QueryCtx, args: ByCityArgs) => {
     const city = args.city.trim();
     if (!city) return [];
 
     const spaces = await ctx.db
       .query("spaces")
-      .withIndex("by_city", (q: any) => q.eq("city", city))
+      .withIndex("by_city", (q) => q.eq("city", city))
       .collect();
 
     return spaces;
   },
 });
 
-type GetArgs = { id: any };
+type GetArgs = { id: Id<"spaces"> };
 
 export const get = query({
   args: { id: v.id("spaces") },
-  handler: async (ctx: AnyCtx, args: GetArgs) => {
+  handler: async (ctx: QueryCtx, args: GetArgs) => {
     const space = await ctx.db.get(args.id);
     if (!space) return null;
 
     const active = await ctx.db
       .query("checkins")
-      .withIndex("by_space_active", (q: any) => q.eq("spaceId", args.id).eq("active", true))
+      .withIndex("by_space_active", (q) => q.eq("spaceId", args.id).eq("active", true))
       .collect();
 
     return { space, activeCount: active.length, active };

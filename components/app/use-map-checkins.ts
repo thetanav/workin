@@ -19,11 +19,11 @@ export function useMapCheckins(center: { lat: number; lng: number }) {
 
   const bbox = React.useMemo(() => bboxAround(center, radiusKm), [center, radiusKm]);
 
-  const res = useQuery(api.checkins.activeNearby, bbox as any) as any[] | undefined;
+  const res = useQuery(api.checkins.activeNearby, bbox);
 
   const checkins = React.useMemo(() => {
     if (!res) return [] as MapCheckin[];
-    return res.map((c: any) => ({
+    return res.map((c) => ({
       id: String(c._id),
       lat: c.lat,
       lng: c.lng,

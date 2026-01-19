@@ -9,7 +9,6 @@ import { CheckinPanel } from "@/components/app/checkin-panel";
 import { ConvexNotice } from "@/components/app/convex-notice";
 import { useMapCheckins } from "@/components/app/use-map-checkins";
 import { useRouter } from "next/navigation";
-import AuthComp from "@/components/app/auth-comp";
 import { useUser } from "@clerk/nextjs";
 
 export default function Home() {
@@ -28,7 +27,6 @@ export default function Home() {
     >
       <ConvexNotice />
       {user?.fullName}
-      <AuthComp />
       {!coords ? (
         <LocationGate onReady={setCoords} />
       ) : (

@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { useAuth } from "@clerk/nextjs";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -32,22 +33,33 @@ export function CheckinPanel({
   coords: { lat: number; lng: number };
 }) {
   const convexReady = useConvexConfigured();
-
-  const create = useMutation(api.checkins.createAtCurrentLocation as any);
-  const end = useMutation(api.checkins.endMyCheckin as any);
+  const { isLoaded, userId } = useAuth();
+  
+  const activeCheckin = useQuery(api.checkins.getMyActiveCheckin);
+  const create = useMutation(api.checkins.createAtCurrentLocation);
+  const end = useMutation(api.checkins.endMyCheckin);
 
   const [place, setPlace] = React.useState("Current spot");
   const [city, setCity] = React.useState("");
   const [note, setNote] = React.useState("");
-
+  
+  // Initialize with activeCheckin shareId if available
   const [shareId, setShareId] = React.useState<string | null>(null);
   const [creating, setCreating] = React.useState(false);
 
-  const canUse = convexReady && typeof create === "function";
+  React.useEffect(() => {
+    if (activeCheckin) {
+      setShareId(activeCheckin.shareId);
+    } else {
+      setShareId(null);
+    }
+  }, [activeCheckin]);
+
+  const canUse = convexReady && isLoaded && !!userId;
 
   async function onCreate() {
     if (!canUse) {
-      toast.error("Convex is not configured yet.");
+      toast.error("Please sign in to check in.");
       return;
     }
 
@@ -67,8 +79,9 @@ export function CheckinPanel({
 
       setShareId(res.shareId);
       toast.success("Checked in.");
-    } catch (e: any) {
-      toast.error(e?.message ?? "Failed to check in");
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Failed to check in";
+      toast.error(msg);
     } finally {
       setCreating(false);
     }
@@ -76,7 +89,7 @@ export function CheckinPanel({
 
   async function onEnd() {
     if (!canUse) {
-      toast.error("Convex is not configured yet.");
+      toast.error("Please sign in.");
       return;
     }
 
@@ -100,41 +113,63 @@ export function CheckinPanel({
             </p>
           </div>
           <Badge variant={canUse ? "secondary" : "destructive"}>
-            {!canUse ? "convex not set" : "ready"}
+            {!canUse ? "sign in needed" : "ready"}
           </Badge>
         </div>
 
-        <div className="grid gap-3">
-          <div className="grid gap-2">
-            <label className="text-xs text-muted-foreground">Place</label>
-            <Input value={place} onChange={(e) => setPlace(e.target.value)} />
+        {!shareId ? (
+          <div className="grid gap-3">
+            <div className="grid gap-2">
+              <label className="text-xs text-muted-foreground">Place</label>
+              <Input
+                value={place}
+                onChange={(e) => setPlace(e.target.value)}
+                disabled={!canUse}
+              />
+            </div>
+            <div className="grid gap-2">
+              <label className="text-xs text-muted-foreground">City</label>
+              <Input
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                disabled={!canUse}
+              />
+            </div>
+            <div className="grid gap-2">
+              <label className="text-xs text-muted-foreground">Note</label>
+              <Textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="e.g. Heads down for an hour, join if you want"
+                disabled={!canUse}
+              />
+            </div>
           </div>
-          <div className="grid gap-2">
-            <label className="text-xs text-muted-foreground">City</label>
-            <Input value={city} onChange={(e) => setCity(e.target.value)} />
+        ) : (
+          <div className="rounded-md border border-border/60 bg-background/50 p-4">
+             <p className="text-sm font-medium text-green-500">You are checked in!</p>
+             <p className="text-xs text-muted-foreground mt-1">
+               Share ID: <span className="font-mono">{shareId}</span>
+             </p>
           </div>
-          <div className="grid gap-2">
-            <label className="text-xs text-muted-foreground">Note</label>
-            <Textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="e.g. Heads down for an hour, join if you want"
-            />
-          </div>
-        </div>
+        )}
 
-          <div className="flex flex-wrap items-center gap-2">
-            <Button onClick={onCreate} disabled={!canUse || creating || !!shareId}>
+        <div className="flex flex-wrap items-center gap-2">
+          {!shareId && (
+            <Button onClick={onCreate} disabled={!canUse || creating}>
+              {creating ? "Checking in..." : "Check in now"}
+            </Button>
+          )}
 
-            {shareId ? "Checked in" : creating ? "Checking in..." : "Check in now"}
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={onEnd}
-            disabled={!canUse || !shareId}
-          >
-            End
-          </Button>
+          {shareId && (
+            <Button
+              variant="secondary"
+              onClick={onEnd}
+              disabled={!canUse}
+            >
+              End
+            </Button>
+          )}
 
           {shareId && (
             <Button variant="outline" asChild>

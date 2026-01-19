@@ -13,6 +13,8 @@ export default defineSchema({
     name: v.string(),
     bio: v.optional(v.string()),
     avatarUrl: v.optional(v.string()),
+    github: v.optional(v.string()),
+    twitter: v.optional(v.string()),
     links: v.optional(v.array(v.string())),
     skills: v.optional(v.array(v.string())),
     updatedAt: v.number(),

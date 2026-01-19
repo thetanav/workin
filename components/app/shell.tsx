@@ -1,4 +1,5 @@
 import Link from "next/link";
+import AuthComp from "@/components/app/auth-comp";
 
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -50,7 +51,10 @@ export function Shell({
               </div>
             )}
           </div>
-          <div className="flex items-center gap-2">{right}</div>
+          <div className="flex items-center gap-2">
+            <AuthComp />
+            {right}
+          </div>
         </header>
 
         <nav className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">

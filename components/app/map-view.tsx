@@ -49,10 +49,6 @@ export function MapView({
   onCheckin?: (shareId: string) => void;
 }) {
   const [open, setOpen] = React.useState<string | null>(null);
-  const openItem = React.useMemo(
-    () => checkins.find((c) => c.shareId === open) ?? null,
-    [checkins, open],
-  );
 
   return (
     <Card className="overflow-hidden border-border/60 bg-card/40 p-0">
