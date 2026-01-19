@@ -9,7 +9,24 @@ export const current = query({
   },
 });
 
-export async function getCurrentUser(ctx: QueryCtx, clerkUserId?: string) {
+export const updateProfile = mutation({
+  args: {
+    bio: v.optional(v.string()),
+    links: v.optional(v.array(v.string())),
+  },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUser(ctx);
+    if (!user) throw new Error("Unauthorized");
+
+    await ctx.db.patch(user._id, {
+      bio: args.bio,
+      links: args.links,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+export async function getCurrentUser(ctx: QueryCtx | MutationCtx, clerkUserId?: string) {
   const identity = await ctx.auth.getUserIdentity();
   if (identity === null) return null;
   return await ctx.db

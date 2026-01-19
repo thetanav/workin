@@ -28,7 +28,7 @@ export function useMapCheckins(center: { lat: number; lng: number }) {
       lat: c.lat,
       lng: c.lng,
       note: c.note ?? undefined,
-      shareId: c.shareId,
+      shareId: c._id,
     }));
   }, [res]);
 

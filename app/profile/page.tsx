@@ -10,49 +10,31 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 export default function ProfilePage() {
-  const profile = useQuery(api.profiles.getMe);
-  const upsert = useMutation(api.profiles.upsert);
+  const user = useQuery(api.users.current);
+  const updateProfile = useMutation(api.users.updateProfile);
 
-  const [name, setName] = React.useState("");
-  const [handle, setHandle] = React.useState("");
   const [bio, setBio] = React.useState("");
-  const [github, setGithub] = React.useState("");
-  const [twitter, setTwitter] = React.useState("");
   const [links, setLinks] = React.useState("");
-  const [skills, setSkills] = React.useState("");
+  const [isSaving, setIsSaving] = React.useState(false);
 
   React.useEffect(() => {
-    if (!profile) return;
-    setName(profile.name ?? "");
-    setHandle(profile.handle ?? "");
-    setBio(profile.bio ?? "");
-    setGithub(profile.github ?? "");
-    setTwitter(profile.twitter ?? "");
-    setLinks(Array.isArray(profile.links) ? profile.links.join(", ") : "");
-    setSkills(Array.isArray(profile.skills) ? profile.skills.join(", ") : "");
-  }, [profile]);
+    if (!user) return;
+    setBio(user.bio ?? "");
+    setLinks(Array.isArray(user.links) ? user.links.join(", ") : "");
+  }, [user]);
 
   async function onSave() {
-    if (!profile) {
-      toast.error("Please sign in to save profile");
-      return;
-    }
+    if (!user) return;
+    setIsSaving(true);
     try {
-      await upsert({
-        userId: profile.userId!,
-        name: name.trim() || "Anonymous",
-        handle: handle.trim() || undefined,
+      await updateProfile({
         bio: bio.trim() || undefined,
-        github: github.trim() || undefined,
-        twitter: twitter.trim() || undefined,
         links: links
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean),
-        skills: skills
           .split(",")
           .map((s) => s.trim())
           .filter(Boolean),
@@ -61,7 +43,19 @@ export default function ProfilePage() {
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Failed to save";
       toast.error(msg);
+    } finally {
+      setIsSaving(false);
     }
+  }
+
+  if (user === undefined) {
+    return (
+      <Shell title="Profile">
+        <div className="flex h-[50vh] items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </Shell>
+    );
   }
 
   return (
@@ -69,75 +63,61 @@ export default function ProfilePage() {
       title="Profile"
       subtitle="Manage your public builder profile."
     >
-      <div className="grid gap-6 lg:grid-cols-[1fr_0.8fr]">
-        <Card className="border-border/60 bg-card/40 p-5">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-sm font-medium">Edit</p>
-              <p className="text-sm text-muted-foreground">
-                Public creator profile used for trust.
-              </p>
+      <div className="mx-auto max-w-2xl">
+        <Card className="border-border/60 bg-card/40 p-8 backdrop-blur-sm">
+          {!user ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">Please sign in to view your profile.</p>
             </div>
-            {/* <Badge variant="secondary">MVP</Badge> */}
-          </div>
+          ) : (
+            <div className="space-y-6">
+              <div className="flex items-center gap-4 border-b border-border/40 pb-6">
+                 <div className="h-16 w-16 rounded-full bg-muted overflow-hidden">
+                    {user.imageUrl && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={user.imageUrl} alt={user.name} className="h-full w-full object-cover" />
+                    )}
+                 </div>
+                 <div>
+                    <h2 className="text-xl font-semibold">{user.name}</h2>
+                    <p className="text-sm text-muted-foreground">{user.email}</p>
+                 </div>
+              </div>
 
-          <div className="mt-5 grid gap-4">
-            <div className="grid gap-2">
-              <label className="text-xs text-muted-foreground">Name</label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} />
-            </div>
-            <div className="grid gap-2">
-              <label className="text-xs text-muted-foreground">Handle</label>
-              <Input value={handle} onChange={(e) => setHandle(e.target.value)} />
-            </div>
-            <div className="grid gap-2">
-              <label className="text-xs text-muted-foreground">Bio</label>
-              <Textarea value={bio} onChange={(e) => setBio(e.target.value)} />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-               <div className="grid gap-2">
-                <label className="text-xs text-muted-foreground">GitHub</label>
-                <Input value={github} onChange={(e) => setGithub(e.target.value)} placeholder="username" />
-               </div>
-               <div className="grid gap-2">
-                <label className="text-xs text-muted-foreground">X / Twitter</label>
-                <Input value={twitter} onChange={(e) => setTwitter(e.target.value)} placeholder="username" />
-               </div>
-            </div>
-            <div className="grid gap-2">
-              <label className="text-xs text-muted-foreground">Other Links</label>
-              <Input
-                value={links}
-                onChange={(e) => setLinks(e.target.value)}
-                placeholder="comma separated"
-              />
-            </div>
-            <div className="grid gap-2">
-              <label className="text-xs text-muted-foreground">Skills</label>
-              <Input
-                value={skills}
-                onChange={(e) => setSkills(e.target.value)}
-                placeholder="comma separated"
-              />
-            </div>
+              <div className="grid gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="bio">Bio</Label>
+                  <Textarea 
+                    id="bio"
+                    value={bio} 
+                    onChange={(e) => setBio(e.target.value)} 
+                    placeholder="Tell us what you're building..."
+                    className="min-h-[100px] resize-none bg-background/50"
+                  />
+                </div>
+                
+                <div className="grid gap-2">
+                  <Label htmlFor="links">Links</Label>
+                  <Input
+                    id="links"
+                    value={links}
+                    onChange={(e) => setLinks(e.target.value)}
+                    placeholder="github.com/u/..., twitter.com/..."
+                    className="bg-background/50"
+                  />
+                  <p className="text-[10px] text-muted-foreground">Comma separated URLs</p>
+                </div>
 
-            <div className="flex items-center gap-2">
-              <Button onClick={onSave} disabled={!profile}>Save</Button>
+                <div className="pt-4 flex justify-end">
+                  <Button onClick={onSave} disabled={isSaving}>
+                    {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Save Changes
+                  </Button>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
         </Card>
-
-        {profile && (
-            <Card className="border-border/60 bg-card/40 p-5">
-            <p className="text-sm font-medium">Your ID</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-                Internal user ID.
-            </p>
-            <p className="mt-4 rounded-md border border-border/60 bg-background/40 p-3 font-mono text-xs">
-                {profile.userId}
-            </p>
-            </Card>
-        )}
       </div>
     </Shell>
   );

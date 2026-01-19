@@ -12,18 +12,11 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { MapPin, ArrowRight, XCircle } from "lucide-react";
 
-type CreateResponse = { id: string; shareId: string };
-
-type SpaceInput = {
-  name: string;
-  city?: string;
-  country?: string;
-  address?: string;
-  lat: number;
-  lng: number;
-};
+type CreateResponse = { id: string };
 
 export function CheckinPanel({
   coords,
@@ -33,11 +26,9 @@ export function CheckinPanel({
   const { isLoaded, userId } = useAuth();
 
   const activeCheckin = useQuery(api.checkins.getMyActiveCheckin);
-  const create = useMutation(api.checkins.createAtCurrentLocation);
+  const create = useMutation(api.checkins.createCheckin);
   const end = useMutation(api.checkins.endMyCheckin);
 
-  const [place, setPlace] = React.useState("Current spot");
-  const [city, setCity] = React.useState("");
   const [note, setNote] = React.useState("");
 
   // Initialize with activeCheckin shareId if available
@@ -46,13 +37,13 @@ export function CheckinPanel({
 
   React.useEffect(() => {
     if (activeCheckin) {
-      setShareId(activeCheckin.shareId);
+      setShareId(activeCheckin._id);
     } else {
       setShareId(null);
     }
   }, [activeCheckin]);
 
-  const canUse = convexReady && isLoaded && !!userId;
+  const canUse = isLoaded && !!userId;
 
   async function onCreate() {
     if (!canUse) {
@@ -62,19 +53,13 @@ export function CheckinPanel({
 
     setCreating(true);
     try {
-      const space: SpaceInput = {
-        name: place.trim() || "Current spot",
-        city: city.trim() || undefined,
+      const res = (await create({
         lat: coords.lat,
         lng: coords.lng,
-      };
-
-      const res = (await create({
-        space,
-        note: note.trim() || undefined,
+        note: note.trim() || "Working here",
       })) as CreateResponse;
 
-      setShareId(res.shareId);
+      setShareId(res.id);
       toast.success("Checked in.");
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Failed to check in";
@@ -100,84 +85,101 @@ export function CheckinPanel({
   }
 
   return (
-    <Card className="border-border/60 bg-card/40 p-5">
-      <div className="flex flex-col gap-4">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-sm font-medium">Check in</p>
-            <p className="text-sm text-muted-foreground">
-              Visible to nearby people + shareable link.
-            </p>
+    <Card className="overflow-hidden border-border/40 bg-card/30 backdrop-blur-sm">
+      <div className="p-5">
+        <div className="flex flex-col gap-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-1">
+              <h3 className="text-base font-semibold leading-none">Check in</h3>
+              <p className="text-sm text-muted-foreground">
+                Broadcast your location to nearby builders.
+              </p>
+            </div>
+            {!canUse ? (
+              <Badge variant="outline" className="text-xs text-yellow-500 border-yellow-500/50 bg-yellow-500/5">
+                Sign in
+              </Badge>
+            ) : (
+              <Badge variant="secondary" className="text-xs bg-green-500/10 text-green-500 border-green-500/20">
+                Ready
+              </Badge>
+            )}
           </div>
-          <Badge variant={canUse ? "secondary" : "destructive"}>
-            {!canUse ? "sign in needed" : "ready"}
-          </Badge>
+
+          {!shareId ? (
+            <div className="grid gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="note" className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  What are you working on?
+                </Label>
+                <Textarea
+                  id="note"
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  placeholder="e.g. Building web apps, learning React Native..."
+                  disabled={!canUse}
+                  className="min-h-[80px] bg-background/40 resize-none"
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="group relative overflow-hidden rounded-xl border border-green-500/20 bg-green-500/5 p-4 transition-all hover:border-green-500/30">
+              <div className="relative z-10 flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold text-green-500 flex items-center gap-1.5">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    </span>
+                    You are checked in!
+                  </p>
+                </div>
+                {/* <Badge variant="outline" className="font-mono text-[10px] uppercase tracking-tighter">
+                  ID: {shareId}
+                </Badge> */}
+              </div>
+              <div className="absolute -right-6 -top-6 text-green-500/10 transition-transform group-hover:scale-110">
+                <MapPin size={80} />
+              </div>
+            </div>
+          )}
+
+          <div className="flex flex-col gap-2">
+            {!shareId ? (
+              <Button 
+                onClick={onCreate} 
+                disabled={!canUse || creating}
+                className="w-full shadow-lg shadow-primary/20"
+              >
+                {creating ? (
+                  "Checking in..."
+                ) : (
+                  <>
+                    Check in now
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </>
+                )}
+              </Button>
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" asChild className="w-full">
+                  <Link href={`/c/${shareId}`}>
+                    Share Page
+                  </Link>
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={onEnd}
+                  disabled={!canUse}
+                  className="w-full text-destructive hover:bg-destructive/10 hover:text-destructive"
+                >
+                  <XCircle className="mr-2 h-4 w-4" />
+                  End Session
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
-
-        {!shareId ? (
-          <div className="grid gap-3">
-            <div className="grid gap-2">
-              <label className="text-xs text-muted-foreground">Place</label>
-              <Input
-                value={place}
-                onChange={(e) => setPlace(e.target.value)}
-                disabled={!canUse}
-              />
-            </div>
-            <div className="grid gap-2">
-              <label className="text-xs text-muted-foreground">City</label>
-              <Input
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                disabled={!canUse}
-              />
-            </div>
-            <div className="grid gap-2">
-              <label className="text-xs text-muted-foreground">Note</label>
-              <Textarea
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                placeholder="e.g. Heads down for an hour, join if you want"
-                disabled={!canUse}
-              />
-            </div>
-          </div>
-        ) : (
-          <div className="rounded-md border border-border/60 bg-background/50 p-4">
-            <p className="text-sm font-medium text-green-500">You are checked in!</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Share ID: <span className="font-mono">{shareId}</span>
-            </p>
-          </div>
-        )}
-
-        <div className="flex flex-wrap items-center gap-2">
-          {!shareId && (
-            <Button onClick={onCreate} disabled={!canUse || creating}>
-              {creating ? "Checking in..." : "Check in now"}
-            </Button>
-          )}
-
-          {shareId && (
-            <Button
-              variant="secondary"
-              onClick={onEnd}
-              disabled={!canUse}
-            >
-              End
-            </Button>
-          )}
-
-          {shareId && (
-            <Button variant="outline" asChild>
-              <Link href={`/c/${shareId}`}>Open share page</Link>
-            </Button>
-          )}
-        </div>
-
-        <p className="text-xs text-muted-foreground font-mono">
-          lat: {coords.lat.toFixed(5)} lng: {coords.lng.toFixed(5)}
-        </p>
       </div>
     </Card>
   );

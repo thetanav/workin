@@ -25,17 +25,18 @@ export default function Home() {
       title="Find a place to work, together"
       subtitle="Check in at your current spot. Nearby builders can join you, or you can share a link."
     >
-      <AuthComp />
       {!coords ? (
-        <LocationGate onReady={setCoords} />
+        <div className="max-w-2xl mx-auto mt-8">
+          <LocationGate onReady={setCoords} />
+        </div>
       ) : (
-        <div className="grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
+        <div className="grid gap-8 lg:grid-cols-[1fr_380px] items-start">
           <MapView
             center={coords}
             checkins={checkins}
             onCheckin={(shareId) => router.push(`/c/${shareId}`)}
           />
-          <div className="space-y-6">
+          <div className="sticky top-6">
             <CheckinPanel coords={coords} />
           </div>
         </div>
