@@ -17,9 +17,11 @@ export type MapCheckin = {
 export function useMapCheckins(center: { lat: number; lng: number }) {
   const [radiusKm, setRadiusKm] = React.useState(4);
 
-  const bbox = React.useMemo(() => bboxAround(center, radiusKm), [center, radiusKm]);
+  // `activeNearby` currently takes `{ lat, lng }`.
+  // We still keep `radiusKm` here so the UI can evolve without changing callers.
+  React.useMemo(() => bboxAround(center, radiusKm), [center, radiusKm]);
 
-  const res = useQuery(api.checkins.activeNearby, bbox);
+  const res = useQuery(api.checkins.activeNearby, { lat: center.lat, lng: center.lng });
 
   const checkins = React.useMemo(() => {
     if (!res) return [] as MapCheckin[];

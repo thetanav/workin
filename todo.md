@@ -1,23 +1,22 @@
-# workin app
+# WorkIn
 
-general
-- user can create status like "i am here" and checkin there
-- any person can serch for the city and see spaces in the city
-- user can who want to checkin can request any one in there current location
-- there will be rating for the user which will allow other to find a legit person
-- user can add there github and x link to there profile and a 255 words bio
-- make convex functions as you need for this
+## MVP
+- Check-in: create status ("I am here") with location + note
+- Discover: city search + map/list of active check-ins
+- Share: open check-in details / share page
+- Profile: bio (<= 255 words) + links (GitHub/X)
 
-ui 
-- there will be there pages, settings, history for spaces joined, search
-- / search page user will have a map for the city the user searched and show marks on the map where users are building or learing. now user can open that place in a new page with /l/long/lat to see how many peoples are there.
-- /create page is for user to create a status for i am here working come collaborate there, add a descirption like "i am here building web apps, learning react native"
+## Next
+- Build health: fix Convex TS errors, run `npx convex dev`, ensure `npm run build`
+- Pages: search, create, settings, history
+- /search: city -> map markers -> open `/c/[id]`
+- Optional: `/l/[lng]/[lat]` location page (count + list)
+- Requests: send/accept/reject collaboration requests
+- Ratings: user trust score + display in cards/profile
 
-rules
-- follow the convex/schema.ts
+## Rules
+- Follow `convex/schema.ts`
 
-## Map cn - https://mapcn.vercel.app/docs
-the map library for this project
-
-## Coss Ui - https://coss.com/ui/llms.txt
-the ui library for this project
+## Libs
+- Map: https://mapcn.vercel.app/docs
+- UI: https://coss.com/ui/llms.txt

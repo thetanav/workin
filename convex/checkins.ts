@@ -1,33 +1,43 @@
 import { v } from "convex/values";
 import { mutation, query, QueryCtx, MutationCtx } from "./_generated/server";
+import { Id } from "./_generated/dataModel";
 
 const CHECKIN_TTL_MS = 6 * 60 * 60 * 1000; // 6hr
 
-// TODO: use redis geosearch have to work on this it is broken
+function getBoundingBox(lat: number, lng: number, radiusKm: number) {
+  const latDelta = radiusKm / 111;
+  const lngDelta = radiusKm / (111 * Math.cos((lat * Math.PI) / 180));
+
+  return {
+    minLat: lat - latDelta,
+    maxLat: lat + latDelta,
+    minLng: lng - lngDelta,
+    maxLng: lng + lngDelta,
+  };
+}
+
 export const activeNearby = query({
   args: {
-    minLat: v.number(),
-    maxLat: v.number(),
-    minLng: v.number(),
-    maxLng: v.number(),
+    lng: v.number(),
+    lat: v.number(),
   },
   handler: async (ctx: QueryCtx, args) => {
-    const now = Date.now();
-    const results = await ctx.db
-      .query("checkins")
-      .filter((q) => q.eq(q.field("active"), true))
-      .collect();
+    // default checks to 10km radius
+    const box = getBoundingBox(args.lat, args.lng, 10);
 
-    return results
-      .filter((c) => now - c.startedAt < CHECKIN_TTL_MS)
-      .filter(
-        (c) =>
-          c.lat >= args.minLat &&
-          c.lat <= args.maxLat &&
-          c.lng >= args.minLng &&
-          c.lng <= args.maxLng,
+    return await ctx.db
+      .query("checkins")
+      .filter((q) =>
+        q.and(
+          q.gte(q.field("lat"), box.minLat),
+          q.lte(q.field("lat"), box.maxLat),
+          q.gte(q.field("lng"), box.minLng),
+          q.lte(q.field("lng"), box.maxLng),
+          q.eq(q.field("active"), true),
+        ),
       )
-      .slice(0, 200);
+      .order("desc")
+      .take(10);
   },
 });
 
@@ -36,7 +46,7 @@ export const getById = query({
   handler: async (ctx: QueryCtx, args) => {
     // _id is an Id<"checkins">, but we accept string so we can use it in URLs easily.
     // Use the safe getter instead of filtering on _id.
-    const checkin = await ctx.db.get(args.id as any);
+    const checkin = await ctx.db.get(args.id as Id<"checkins">);
 
     if (!checkin) return { checkin: null };
 
@@ -101,7 +111,7 @@ export const createCheckin = mutation({
       await ctx.db.patch(existing._id, { active: false, endedAt: now });
     }
 
-    const name = "unknown"
+    const name = "unknown";
 
     // create a checkin
     const id = await ctx.db.insert("checkins", {

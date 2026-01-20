@@ -10,18 +10,17 @@ export default defineSchema({
     bio: v.optional(v.string()),
     links: v.optional(v.array(v.string())),
     updatedAt: v.number(),
-  })
-    .index("by_clerk", ["clerkId"]),
+  }).index("by_clerk", ["clerkId"]),
 
   checkins: defineTable({
     clerkId: v.string(),
+    userImageUrl: v.string(),
     lat: v.number(),
     lng: v.number(),
-    name: c.string(),
+    placeName: v.string(),
     note: v.string(),
     active: v.boolean(),
     startedAt: v.number(),
     endedAt: v.optional(v.number()),
-  })
-    .index("by_clerk_active", ["clerkId", "active"])
+  }).index("by_clerk_active", ["clerkId", "active"]),
 });

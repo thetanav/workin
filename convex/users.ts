@@ -1,4 +1,9 @@
-import { mutation, query, QueryCtx, MutationCtx, internalMutation } from "./_generated/server";
+import {
+  mutation,
+  query,
+  QueryCtx,
+  internalMutation,
+} from "./_generated/server";
 import { v, Validator } from "convex/values";
 import { UserJSON } from "@clerk/backend";
 
@@ -29,7 +34,7 @@ export const getByClerkId = query({
   handler: async (ctx: QueryCtx, args) => {
     return await ctx.db
       .query("users")
-      .withIndex("by_clerk", (q) => q.eq("clerkId", clerkId))
+      .withIndex("by_clerk", (q) => q.eq("clerkId", args.clerkId))
       .unique();
   },
 });
@@ -40,7 +45,12 @@ export const updateProfile = mutation({
     links: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
-    const user = await getCurrentUser(ctx);
+    const identity = await ctx.auth.getUserIdentity();
+    if (identity === null) return null;
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk", (q) => q.eq("clerkId", identity.subject))
+      .unique();
     if (!user) throw new Error("Unauthorized");
 
     await ctx.db.patch(user._id, {
@@ -86,7 +96,7 @@ export const deleteFromClerk = internalMutation({
       await ctx.db.delete(user._id);
     } else {
       console.warn(
-        `Can't delete user, there is none for Clerk user ID: ${clerkUserId}`
+        `Can't delete user, there is none for Clerk user ID: ${clerkUserId}`,
       );
     }
   },
