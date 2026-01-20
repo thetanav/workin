@@ -1,17 +1,9 @@
 import { v } from "convex/values";
 import { mutation, query, QueryCtx, MutationCtx } from "./_generated/server";
 
-
-type ActiveNearbyArgs = {
-  minLat: number;
-  maxLat: number;
-  minLng: number;
-  maxLng: number;
-};
-
 const CHECKIN_TTL_MS = 6 * 60 * 60 * 1000; // 6hr
 
-// have to work on this it is broken
+// TODO: use redis geosearch have to work on this it is broken
 export const activeNearby = query({
   args: {
     minLat: v.number(),
@@ -19,7 +11,7 @@ export const activeNearby = query({
     minLng: v.number(),
     maxLng: v.number(),
   },
-  handler: async (ctx: QueryCtx, args: ActiveNearbyArgs) => {
+  handler: async (ctx: QueryCtx, args) => {
     const now = Date.now();
     const results = await ctx.db
       .query("checkins")
@@ -59,7 +51,6 @@ export const getById = query({
   },
 });
 
-
 export const getMyActiveCheckin = query({
   args: {},
   handler: async (ctx: QueryCtx) => {
@@ -80,6 +71,7 @@ export const getMyActiveCheckin = query({
   },
 });
 
+// TODO: get the location name
 export const createCheckin = mutation({
   args: {
     note: v.string(),
@@ -109,10 +101,13 @@ export const createCheckin = mutation({
       await ctx.db.patch(existing._id, { active: false, endedAt: now });
     }
 
+    const name = "unknown"
+
     // create a checkin
     const id = await ctx.db.insert("checkins", {
       clerkId,
       lat: args.lat,
+      name,
       lng: args.lng,
       note: args.note,
       active: true,

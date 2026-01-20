@@ -17,6 +17,7 @@ export default defineSchema({
     clerkId: v.string(),
     lat: v.number(),
     lng: v.number(),
+    name: c.string(),
     note: v.string(),
     active: v.boolean(),
     startedAt: v.number(),

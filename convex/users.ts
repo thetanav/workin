@@ -5,7 +5,32 @@ import { UserJSON } from "@clerk/backend";
 export const current = query({
   args: {},
   handler: async (ctx) => {
-    return await getCurrentUser(ctx);
+    const identity = await ctx.auth.getUserIdentity();
+    if (identity === null) return null;
+    return await ctx.db
+      .query("users")
+      .withIndex("by_clerk", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+  },
+});
+
+export const getById = query({
+  args: { userId: v.string() },
+  handler: async (ctx: QueryCtx, args) => {
+    return await ctx.db
+      .query("users")
+      .filter((q) => q.eq("_id", args.userId))
+      .unique();
+  },
+});
+
+export const getByClerkId = query({
+  args: { clerkId: v.string() },
+  handler: async (ctx: QueryCtx, args) => {
+    return await ctx.db
+      .query("users")
+      .withIndex("by_clerk", (q) => q.eq("clerkId", clerkId))
+      .unique();
   },
 });
 
@@ -23,25 +48,6 @@ export const updateProfile = mutation({
       links: args.links,
       updatedAt: Date.now(),
     });
-  },
-});
-
-export async function getCurrentUser(ctx: QueryCtx | MutationCtx, clerkUserId?: string) {
-  const identity = await ctx.auth.getUserIdentity();
-  if (identity === null) return null;
-  return await ctx.db
-    .query("users")
-    .withIndex("by_clerk", (q) => q.eq("clerkId", identity.subject))
-    .unique();
-}
-
-export const getByUserId = query({
-  args: { userId: v.string() },
-  handler: async (ctx: QueryCtx, args) => {
-    return await ctx.db
-      .query("users")
-      .filter((q) => q.eq("_id", args.userId))
-      .unique();
   },
 });
 
