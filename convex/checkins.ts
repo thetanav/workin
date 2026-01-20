@@ -1,5 +1,14 @@
 import { v } from "convex/values";
-import { mutation, query, QueryCtx, MutationCtx } from "./_generated/server";
+import { internal } from "./_generated/api";
+import {
+  mutation,
+  query,
+  action,
+  internalMutation,
+  QueryCtx,
+  MutationCtx,
+  ActionCtx,
+} from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 
 const CHECKIN_TTL_MS = 6 * 60 * 60 * 1000; // 6hr
@@ -44,13 +53,10 @@ export const activeNearby = query({
 export const getById = query({
   args: { id: v.string() },
   handler: async (ctx: QueryCtx, args) => {
-    // _id is an Id<"checkins">, but we accept string so we can use it in URLs easily.
-    // Use the safe getter instead of filtering on _id.
     const checkin = await ctx.db.get(args.id as Id<"checkins">);
 
     if (!checkin) return { checkin: null };
 
-    // Defensive check: this endpoint is for checkins only.
     if (!("startedAt" in checkin)) return { checkin: null };
 
     if (Date.now() - checkin.startedAt >= CHECKIN_TTL_MS) {
@@ -81,12 +87,15 @@ export const getMyActiveCheckin = query({
   },
 });
 
-// TODO: get the location name
-export const createCheckin = mutation({
+const INTERNAL_DEFAULT_AVATAR = "https://avatar.vercel.sh/placeholder";
+
+export const internalCreateCheckin = internalMutation({
   args: {
     note: v.string(),
     lat: v.number(),
     lng: v.number(),
+    placeName: v.string(),
+    userImageUrl: v.string(),
   },
   handler: async (ctx: MutationCtx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -94,7 +103,7 @@ export const createCheckin = mutation({
     const clerkId = identity.subject;
 
     const now = Date.now();
-    // a person can only has one active checkin at a time
+
     const existing = await ctx.db
       .query("checkins")
       .withIndex("by_clerk_active", (q) =>
@@ -106,25 +115,58 @@ export const createCheckin = mutation({
       throw new Error("You already have an active check-in.");
     }
 
-    // large then ttl then expire the check in
     if (existing && now - existing.startedAt >= CHECKIN_TTL_MS) {
       await ctx.db.patch(existing._id, { active: false, endedAt: now });
     }
 
-    const name = "unknown";
-
-    // create a checkin
     const id = await ctx.db.insert("checkins", {
       clerkId,
       lat: args.lat,
-      name,
       lng: args.lng,
+      placeName: args.placeName,
+      userImageUrl: args.userImageUrl,
       note: args.note,
       active: true,
       startedAt: now,
     });
 
     return { id };
+  },
+});
+
+export const createCheckin = action({
+  args: {
+    note: v.string(),
+    lat: v.number(),
+    lng: v.number(),
+  },
+  handler: async (ctx: ActionCtx, args): Promise<{ id: Id<"checkins"> }> => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
+
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${args.lat}&lon=${args.lng}`,
+      {
+        headers: {
+          "User-Agent": "checkin-app",
+        },
+      },
+    );
+
+    const data = await res.json();
+
+    const placeName =
+      data.name ||
+      data.display_name?.split(",").slice(0, 2).join(", ") ||
+      "Unknown place";
+
+    return await ctx.runMutation(internal.checkins.internalCreateCheckin, {
+      lat: args.lat,
+      lng: args.lng,
+      note: args.note,
+      placeName,
+      userImageUrl: identity.pictureUrl || INTERNAL_DEFAULT_AVATAR,
+    });
   },
 });
 

@@ -3,18 +3,18 @@
 import * as React from "react";
 import Link from "next/link";
 
-import { useMutation, useQuery } from "convex/react";
+import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useAuth } from "@clerk/nextjs";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { MapPin, ArrowRight, XCircle } from "lucide-react";
+import { MapPin, ArrowRight, XCircle, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type CreateResponse = { id: string };
 
@@ -26,7 +26,7 @@ export function CheckinPanel({
   const { isLoaded, userId } = useAuth();
 
   const activeCheckin = useQuery(api.checkins.getMyActiveCheckin);
-  const create = useMutation(api.checkins.createCheckin);
+  const create = useAction(api.checkins.createCheckin);
   const end = useMutation(api.checkins.endMyCheckin);
 
   const [note, setNote] = React.useState("");
@@ -60,7 +60,7 @@ export function CheckinPanel({
       })) as CreateResponse;
 
       setShareId(res.id);
-      toast.success("Checked in.");
+      toast.success("Checked in successfully!");
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Failed to check in";
       toast.error(msg);
@@ -78,111 +78,99 @@ export function CheckinPanel({
     try {
       await end({});
       setShareId(null);
-      toast("Check-in ended.");
+      toast.info("Session ended.");
     } catch {
       toast.error("Failed to end check-in");
     }
   }
 
   return (
-    <Card className="overflow-hidden border-border/40 bg-card/30 backdrop-blur-sm">
-      <div className="p-5">
-        <div className="flex flex-col gap-5">
-          <div className="flex items-start justify-between gap-4">
+    <Card className="overflow-hidden border bg-background shadow-sm">
+      <div className="p-6">
+        <div className="flex flex-col gap-6">
+          <div className="flex items-center justify-between gap-4">
             <div className="space-y-1">
-              <h3 className="text-base font-semibold leading-none">Check in</h3>
-              <p className="text-sm text-muted-foreground">
-                Broadcast your location to nearby builders.
+              <h3 className="font-semibold leading-none tracking-tight">Status</h3>
+              <p className="text-xs text-muted-foreground font-mono">
+                {coords.lat.toFixed(4)}, {coords.lng.toFixed(4)}
               </p>
             </div>
             {!canUse ? (
-              <Badge variant="outline" className="text-xs text-yellow-500 border-yellow-500/50 bg-yellow-500/5">
-                Sign in
+              <Badge variant="outline" className="text-muted-foreground">
+                Sign in required
               </Badge>
             ) : (
-              <Badge variant="secondary" className="text-xs bg-green-500/10 text-green-500 border-green-500/20">
-                Ready
-              </Badge>
+              <div className={cn("flex items-center gap-2 text-xs font-medium", shareId ? "text-green-600" : "text-muted-foreground")}>
+                <div className={cn("h-2 w-2 rounded-full", shareId ? "bg-green-600" : "bg-muted-foreground")} />
+                {shareId ? "Live" : "Ready"}
+              </div>
             )}
           </div>
 
-          <p className="text-sm text-muted-foreground">
-            {coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}
-          </p>
-
           {!shareId ? (
-            <div className="grid gap-4">
-              <div className="grid gap-2">
+            <div className="space-y-4">
+              <div className="space-y-2">
                 <Label htmlFor="note" className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  What are you working on?
+                  Activity
                 </Label>
                 <Textarea
                   id="note"
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  placeholder="e.g. Building web apps, learning React Native..."
+                  placeholder="What are you building?"
                   disabled={!canUse}
-                  className="min-h-[80px] bg-background/40 resize-none"
+                  className="min-h-[100px] resize-none"
                 />
               </div>
-            </div>
-          ) : (
-            <div className="group relative overflow-hidden rounded-xl border border-green-500/20 bg-green-500/5 p-4 transition-all hover:border-green-500/30">
-              <div className="relative z-10 flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-sm font-semibold text-green-500 flex items-center gap-1.5">
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                    </span>
-                    You are checked in!
-                  </p>
-                </div>
-                {/* <Badge variant="outline" className="font-mono text-[10px] uppercase tracking-tighter">
-                  ID: {shareId}
-                </Badge> */}
-              </div>
-              <div className="absolute -right-6 -top-6 text-green-500/10 transition-transform group-hover:scale-110">
-                <MapPin size={80} />
-              </div>
-            </div>
-          )}
-
-          <div className="flex flex-col gap-2">
-            {!shareId ? (
+              
               <Button
                 onClick={onCreate}
                 disabled={!canUse || creating}
-                className="w-full shadow-lg shadow-primary/20"
+                className="w-full"
               >
                 {creating ? (
-                  "Checking in..."
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Checking in...
+                  </>
                 ) : (
                   <>
-                    Check in now
+                    Check In
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </>
                 )}
               </Button>
-            ) : (
-              <div className="grid grid-cols-2 gap-2">
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="rounded-lg border bg-muted/50 p-4">
+                <div className="flex items-center gap-3">
+                  <MapPin className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">Checked in</p>
+                    <p className="text-xs text-muted-foreground">Visible on map</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
                 <Button variant="outline" asChild className="w-full">
                   <Link href={`/c/${shareId}`}>
-                    Share Page
+                    Share
                   </Link>
                 </Button>
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   onClick={onEnd}
                   disabled={!canUse}
-                  className="w-full text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  className="w-full text-destructive hover:text-destructive"
                 >
                   <XCircle className="mr-2 h-4 w-4" />
-                  End Session
+                  End
                 </Button>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </Card>

@@ -6,6 +6,7 @@ import {
 } from "./_generated/server";
 import { v, Validator } from "convex/values";
 import { UserJSON } from "@clerk/backend";
+import { Id } from "./_generated/dataModel";
 
 export const current = query({
   args: {},
@@ -22,10 +23,7 @@ export const current = query({
 export const getById = query({
   args: { userId: v.string() },
   handler: async (ctx: QueryCtx, args) => {
-    return await ctx.db
-      .query("users")
-      .filter((q) => q.eq("_id", args.userId))
-      .unique();
+    return await ctx.db.get(args.userId as Id<"users">);
   },
 });
 

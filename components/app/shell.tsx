@@ -1,7 +1,6 @@
 'use client'
 
 import * as React from 'react'
-
 import { cn } from '@/lib/utils'
 
 export function Shell({
@@ -18,24 +17,21 @@ export function Shell({
   className?: string
 }) {
   return (
-    <div className={cn('mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8', className)}>
-      <div className="hero-grid rounded-3xl p-2 mt-4">
-        <header className="flex flex-col gap-3 rounded-2xl border border-border/40 bg-background/60 p-5 backdrop-blur">
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <h1 className="display-font text-2xl font-semibold tracking-tight truncate">
-                {title}
-              </h1>
-              {subtitle ? (
-                <p className="mt-1 text-sm text-muted-foreground truncate">{subtitle}</p>
-              ) : null}
-            </div>
-            {right ? <div className="shrink-0">{right}</div> : null}
-          </div>
-        </header>
-
-        <main className="px-0 py-4 md:p-4">{children}</main>
-      </div>
+    <div className={cn('mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8', className)}>
+      <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            {title}
+          </h1>
+          {subtitle ? (
+            <p className="text-base text-muted-foreground">{subtitle}</p>
+          ) : null}
+        </div>
+        {right ? <div className="shrink-0">{right}</div> : null}
+      </header>
+      <main>
+        {children}
+      </main>
     </div>
   )
 }
