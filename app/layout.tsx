@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
+import { Inter } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
@@ -8,11 +8,6 @@ import Navbar from "@/components/app/navbar";
 
 const sans = Inter({
   subsets: ["latin"],
-});
-
-const display = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-display",
 });
 
 export const metadata: Metadata = {
@@ -25,10 +20,9 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
   return (
     <html lang="en">
-      <body className={`${sans.className} ${display.variable} antialiased`}>
+      <body className={`${sans.className} antialiased`}>
         <ClerkProvider>
           <ConvexClientProvider>
             <Navbar />

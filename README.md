@@ -1,158 +1,98 @@
 # Joinin
 
-A location-based coworking platform that helps builders find and connect with others working nearby. Check in at your current spot, share your location, and collaborate with fellow developers in real-time.
+**The location-based social workspace for builders.**
 
-## Features
+![Project Status](https://img.shields.io/badge/status-active-success.svg)
+![License](https://img.shields.io/badge/license-Private-blue.svg)
 
-### Core Functionality
-- **Location Check-ins**: Share your current working location with a custom status message
-- **Interactive Map**: Visualize nearby builders and coworking spaces using MapLibre
-- **Real-time Updates**: See live check-ins from other developers in your area
-- **Share Links**: Generate shareable links to invite others to join your location
-- **User Profiles**: Create profiles with bio, social links, and ratings
+Joinin helps remote workers, indie hackers, and developers find each other. Check in at your current workspace (coffee shop, library, coworking space), see who else is grinding nearby, and connect IRL.
 
-### Spaces Directory
-- **City-based Search**: Find coworking spaces by city
-- **Space Details**: View information about available coworking locations
-- **Map Integration**: Explore spaces visually on an interactive map
+## ✨ Features
 
-### Technical Features
-- **Authentication**: Secure user authentication via Clerk
-- **Real-time Backend**: Powered by Convex for live data synchronization
-- **Responsive Design**: Mobile-friendly interface built with Next.js and Tailwind CSS
-- **Dark Mode**: Theme switching support with next-themes
+- **📍 Live Check-ins**: Share your location and status ("Deep Work", "Open to Chat") in real-time.
+- **🗺️ Interactive Map**: A beautiful, performance-first map experience powered by MapLibre.
+- **⚡ Real-time Sync**: Instant updates when others check in or move, powered by Convex.
+- **👤 User Profiles**: customizable profiles with GitHub integration and social links.
+- **🔒 Privacy First**: Precise control over when and how your location is shared.
 
-## Tech Stack
+## 🛠 Tech Stack
 
-- **Frontend**: Next.js 16, React 19, TypeScript
-- **Styling**: Tailwind CSS, shadcn/ui components
-- **Maps**: MapLibre GL JS
-- **Backend**: Convex (serverless functions and database)
-- **Authentication**: Clerk
-- **Icons**: Lucide React
+- **Framework**: [Next.js 16](https://nextjs.org/) (App Router)
+- **Language**: TypeScript
+- **Backend**: [Convex](https://convex.dev/) (Real-time database & functions)
+- **Auth**: [Clerk](https://clerk.com/)
+- **Maps**: [MapLibre GL JS](https://maplibre.org/)
+- **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
+- **UI Components**: [shadcn/ui](https://ui.shadcn.com/)
 
-## Getting Started
+## 🚀 Getting Started
+
+Follow these steps to get the project running locally.
 
 ### Prerequisites
 
 - Node.js 18+
-- npm, yarn, pnpm, or bun
-- Convex account (for backend)
-- Clerk account (for authentication)
+- npm, pnpm, or bun
+- A [Convex](https://convex.dev) account
+- A [Clerk](https://clerk.com) account
 
 ### Installation
 
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd joinin
-```
+1. **Clone the repository**
+   ```bash
+   git clone <your-repo-url>
+   cd joinin
+   ```
 
-2. Install dependencies:
-```bash
-npm install
-# or
-yarn install
-# or
-pnpm install
-# or
-bun install
-```
+2. **Install dependencies**
+   ```bash
+   npm install
+   # or
+   bun install
+   ```
 
-3. Set up environment variables:
-Create a `.env.local` file in the root directory with:
-```
-# Clerk environment variables
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
-CLERK_SECRET_KEY=your_clerk_secret_key
+3. **Environment Setup**
+   Create a `.env.local` file in the root directory:
+   ```env
+   # Clerk
+   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+   CLERK_SECRET_KEY=sk_test_...
 
-# Convex environment variables
-NEXT_PUBLIC_CONVEX_URL=your_convex_deployment_url
-CONVEX_DEPLOYMENT=your_convex_deployment_name
-```
+   # Convex
+   CONVEX_DEPLOYMENT=...
+   NEXT_PUBLIC_CONVEX_URL=...
+   ```
 
-4. Set up Convex:
-```bash
-npx convex dev
-```
+4. **Start the Backend**
+   Run the Convex development server in a separate terminal:
+   ```bash
+   npx convex dev
+   ```
 
-5. Run the development server:
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+5. **Start the Frontend**
+   ```bash
+   npm run dev
+   ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+   Visit [http://localhost:3000](http://localhost:3000) to see the app.
 
-## Project Structure
+## 🗺️ Roadmap
 
-```
-├── app/                    # Next.js app directory
-│   ├── layout.tsx         # Root layout
-│   ├── page.tsx          # Home page
-│   ├── profile/          # User profile pages
-│   ├── spaces/           # Coworking spaces pages
-│   └── c/[shareId]/      # Shared check-in pages
-├── components/
-│   ├── app/              # Application components
-│   │   ├── shell.tsx     # Main app shell
-│   │   ├── map-view.tsx  # Map component
-│   │   └── checkin-panel.tsx # Check-in interface
-│   └── ui/               # Reusable UI components
-├── convex/               # Backend functions
-│   ├── schema.ts         # Database schema
-│   ├── checkins.ts       # Check-in functions
-│   └── users.ts          # User management
-└── lib/                  # Utility functions
-```
+We are actively working on:
+- **"Wave" feature**: Send a quick hello to nearby builders.
+- **Venue Ratings**: Rate wifi and coffee quality.
+- **PWA**: Install on your phone for native-like experience.
 
-## Database Schema
+See [todo.md](./todo.md) for the full feature list.
 
-The application uses Convex with the following main tables:
+## 🤝 Contributing
 
-- **users**: User profiles with Clerk integration
-- **checkins**: Location check-ins with coordinates and status messages
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## Development
+## 📄 License
 
-### Available Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
-
-### Code Style
-
-The project follows TypeScript and ESLint conventions. UI components are built using shadcn/ui with Tailwind CSS for styling.
-
-### Contributing
-
-1. Follow the existing code style and conventions
-2. Use TypeScript for all new code
-3. Test your changes thoroughly
-4. Update documentation as needed
-
-## Deployment
-
-### Vercel Deployment
-
-1. Push your code to GitHub
-2. Connect your repository to Vercel
-3. Add environment variables in Vercel dashboard
-4. Deploy
-
-### Convex Deployment
-
-```bash
-npx convex deploy
-```
-
-## License
-
-This project is private and proprietary.
+This project is currently private.

@@ -13,7 +13,7 @@ export default function Navbar() {
   const navItems = [
     { href: "/", label: "Create", icon: Map },
     { href: "/spaces", label: "Spaces", icon: LayoutGrid },
-    { href: "/setting", label: "Setting", icon: Settings },
+    { href: "/settings", label: "Setting", icon: Settings },
   ];
 
   return (

@@ -106,7 +106,7 @@ export function MapView({
                       {initials(c.name)}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="absolute -top-10 left-9 bg-background px-3 p-1 rounded-md text-sm scale-95 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition origin-left">
+                  <div className="absolute -top-10 left-9 bg-background px-3 p-1 rounded-md text-sm scale-95 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition origin-left border shadow">
                     {c.note}
                   </div>
                   <div className="h-4 w-4 rounded-full border-2 border-white bg-red-500" />
