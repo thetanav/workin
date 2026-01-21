@@ -5,6 +5,7 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { MapView } from "@/components/app/map-view";
 import { useCurrentLocation } from "@/components/app/location";
+import { CheckinPanel } from "@/components/app/checkin-panel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Navigation, MapPin, Loader2, AlertCircle } from "lucide-react";
@@ -105,6 +106,9 @@ export default function Page() {
           selectedId={selectedId}
           onSelectId={setSelectedId}
         />
+      </div>
+      <div className="absolute bottom-2 left-2 z-10 w-full max-w-sm">
+        <CheckinPanel coords={coords} />
       </div>
     </div>
   );

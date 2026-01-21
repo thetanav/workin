@@ -90,19 +90,23 @@ export function MapView({
       className={`overflow-hidden border-border/40 bg-card/30 backdrop-blur-sm p-0 shadow-2xl ${className}`}
     >
       <div className="h-full w-full relative">
-        <Map center={[center.lng, center.lat]} zoom={13} theme={resolvedTheme === "dark" ? "dark" : "light"}>
+        <Map
+          center={[center.lng, center.lat]}
+          zoom={13}
+          theme={resolvedTheme === "dark" ? "dark" : "light"}
+        >
           <MapControls showLocate position="bottom-right" />
 
           {/* User Marker */}
-          {/*<MapMarker
+          <MapMarker
             longitude={center.lng}
             latitude={center.lat}
-            className="z-50 opacity-0"
+            className="z-50"
           >
             <MarkerContent>
               <div className="h-6 w-6 rounded-full border-[3px] border-white bg-blue-500 shadow-lg flex items-center justify-center" />
             </MarkerContent>
-          </MapMarker>*/}
+          </MapMarker>
 
           {/* Check-in markers */}
           {checkins.map((c) => (
@@ -125,32 +129,36 @@ export function MapView({
                   </Avatar>
                 </div>
               </MarkerContent>
-               <MarkerPopup className="p-4 w-64 sm:w-62 h-fit mb-6 z-50">
-                 <p className="text-sm sm:text-lg line-clamp-3 text-ellipsis">{c.note}</p>
-                 <div className="flex items-center gap-2 mt-2">
-                   <Avatar className="w-6 h-6">
-                     <AvatarImage src={c.userImageUrl} alt={"user image"} />
-                     <AvatarFallback className="bg-primary text-[10px] text-primary-foreground font-bold">
-                       UN
-                     </AvatarFallback>
-                   </Avatar>
-                   <p className="text-sm text-muted-foreground truncate">{c.placeName}</p>
-                 </div>
-                 <div className="flex gap-2 mt-3">
-                   <Link className="flex-1" href={"/c/" + c.id}>
-                     <Button variant={"outline"} className="w-full h-9 text-sm">
-                       Open
-                     </Button>
-                   </Link>
-                   <Button 
-                     variant={"ghost"} 
-                     className="flex-1 h-9 text-sm"
-                     onClick={() => handleSayHi(c.clerkId)}
-                   >
-                     Say hi
-                   </Button>
-                 </div>
-               </MarkerPopup>
+              <MarkerPopup className="p-4 w-64 sm:w-62 h-fit mb-6 z-50">
+                <p className="text-sm sm:text-lg line-clamp-3 text-ellipsis">
+                  {c.note}
+                </p>
+                <div className="flex items-center gap-2 mt-2">
+                  <Avatar className="w-6 h-6">
+                    <AvatarImage src={c.userImageUrl} alt={"user image"} />
+                    <AvatarFallback className="bg-primary text-[10px] text-primary-foreground font-bold">
+                      UN
+                    </AvatarFallback>
+                  </Avatar>
+                  <p className="text-sm text-muted-foreground truncate">
+                    {c.placeName}
+                  </p>
+                </div>
+                <div className="flex gap-2 mt-3">
+                  <Link className="flex-1" href={"/c/" + c.id}>
+                    <Button variant={"outline"} className="w-full h-9 text-sm">
+                      Open
+                    </Button>
+                  </Link>
+                  <Button
+                    variant={"ghost"}
+                    className="flex-1 h-9 text-sm"
+                    onClick={() => handleSayHi(c.clerkId)}
+                  >
+                    Say hi
+                  </Button>
+                </div>
+              </MarkerPopup>
             </MapMarker>
           ))}
 

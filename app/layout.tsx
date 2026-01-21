@@ -24,7 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${sans.className} antialiased h-screen w-full flex flex-col`}
+        className={`${sans.className} antialiased h-screen max-w-5xl mx-auto flex flex-col`}
       >
         <ThemeProvider
           attribute="class"

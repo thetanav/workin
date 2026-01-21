@@ -7,13 +7,14 @@
 
 Joinin helps remote workers, indie hackers, and developers find each other. Check in at your current workspace (coffee shop, library, coworking space), see who else is grinding nearby, and connect IRL.
 
-## ✨ Features
+## 📚 Key Terminologies
 
-- **📍 Live Check-ins**: Share your location and status ("Deep Work", "Open to Chat") in real-time.
-- **🗺️ Interactive Map**: A beautiful, performance-first map experience powered by MapLibre.
-- **⚡ Real-time Sync**: Instant updates when others check in or move, powered by Convex.
-- **👤 User Profiles**: customizable profiles with GitHub integration and social links.
-- **🔒 Privacy First**: Precise control over when and how your location is shared.
+- **Builders**: Users of Joinin, typically remote workers, indie hackers, and developers who use the app to connect.
+- **Check-in**: The action of sharing your current location and work status at a workspace, making you visible to nearby builders.
+- **Status**: Your current work mode or availability (e.g., "Deep Work" for focused sessions, "Open to Chat" for social interactions).
+- **Wave**: A quick, non-intrusive way to greet nearby builders and start conversations.
+- **Venue/Space**: Physical locations where builders work, such as coffee shops, libraries, coworking spaces, or offices.
+- **Workspace**: Any environment where productive work happens, often referring to shared or public spaces in the context of Joinin.
 
 ## 🛠 Tech Stack
 
