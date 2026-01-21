@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { GitHubStars } from "@/components/github-stars";
 import { NotificationsMenu } from "@/components/app/notifications-menu";
 import { cn } from "@/lib/utils";
-import { Map, LayoutGrid, User, MapPin, Settings } from "lucide-react";
+import { Map, LayoutGrid, MapPin, Settings } from "lucide-react";
 
 export default function Navbar() {
   const pathname = usePathname();

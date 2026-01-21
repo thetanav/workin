@@ -1,14 +1,12 @@
 # Joinin Feature Roadmap
 
 ## HIGH
-- [ ] **Smart Status Expiry**: Automatically check out users after a set duration (e.g., 4 hours) or when they move significantly far from the check-in location.
-- [ ] **Push Notifications**: Web Push for "Wave" alerts and "Friend nearby" notifications.
-- [ ] **"Wave" Interaction**: A low-friction way to say "Hi, I'm nearby" (sends a toast/notification) without a full chat.
 
 ## TODOs
 - [ ] **Future Check-ins**: "I'll be working at [Coffee Shop] tomorrow morning."
-- [ ] **"Focus Mode" Toggle**: Allow users to check in but mark themselves as "Do Not Disturb" (red ring on map avatar).
 - [ ] **User Follow/Friend System**: See specifically where your friends are working.
+- [ ] **Push Notifications**: Web Push for "Wave" alerts and "Friend nearby" notifications.
+- [ ] **"Focus Mode" Toggle**: Allow users to check in but mark themselves as "Do Not Disturb" (red ring on map avatar).
 - [ ] **Direct Messaging**: Simple ephemeral chat when both users are checked in nearby.
 - [ ] **Venue Ratings**: Rate locations based on "Wifi Speed", "Coffee Quality", "Noise Level", and "Outlet Availability".
 - [ ] **Space Directory**: detailed pages for popular coworking spots with aggregated user stats ("3 builders here now").

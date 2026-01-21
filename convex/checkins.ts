@@ -181,7 +181,7 @@ export const createCheckin = action({
   },
 });
 
-export const endMyCheckin = mutation({
+export const stop = mutation({
   args: {},
   handler: async (ctx: MutationCtx) => {
     const identity = await ctx.auth.getUserIdentity();

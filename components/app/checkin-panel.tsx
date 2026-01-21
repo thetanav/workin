@@ -27,7 +27,7 @@ export function CheckinPanel({
 
   const activeCheckin = useQuery(api.checkins.getMyActiveCheckin);
   const create = useAction(api.checkins.createCheckin);
-  const end = useMutation(api.checkins.endMyCheckin);
+  const end = useMutation(api.checkins.stop);
 
   const [note, setNote] = React.useState("");
 
@@ -76,7 +76,7 @@ export function CheckinPanel({
     }
 
     try {
-      await end({});
+      await end();
       setShareId(null);
       toast.info("Session ended.");
     } catch {

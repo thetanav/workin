@@ -7,7 +7,6 @@ import { api } from "@/convex/_generated/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Id } from "@/convex/_generated/dataModel";
 import { ExternalLink, Github, Mail, Globe, ArrowLeft } from "lucide-react";
 
 export default function UserProfile({

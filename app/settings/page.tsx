@@ -66,7 +66,7 @@ export default function ProfileSettingsPage() {
     if (!myActive) return;
     setIsStopping(true);
     try {
-      await stopCheckin({ checkinId: myActive._id });
+      await stopCheckin();
       toast.success("Session stopped");
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Failed to stop session";
