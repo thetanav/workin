@@ -2,13 +2,15 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { toast } from "sonner";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Clock, ArrowLeft, Loader2 } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { MapPin, Clock, ArrowLeft, Loader2, Hand } from "lucide-react";
 
 export default function SharePage({
   params,
@@ -21,6 +23,8 @@ export default function SharePage({
   const data = useQuery(api.checkins.getById, {
     id: unwrappedParams.shareId,
   });
+  const currentUser = useQuery(api.users.current);
+  const sayHello = useMutation(api.users.sayHello);
 
   if (data === undefined) {
       return (
@@ -45,6 +49,17 @@ export default function SharePage({
   }
 
   const { checkin } = data;
+  const isSelf = currentUser?.clerkId === checkin.clerkId;
+
+  const handleSayHello = async () => {
+    try {
+      await sayHello({ clerkId: checkin.clerkId });
+      toast.success("Said hello!");
+    } catch (error) {
+      toast.error("Failed to say hello");
+      console.error(error);
+    }
+  };
 
   return (
     <div className="container mx-auto max-w-lg px-4 py-12 md:py-24">
@@ -69,8 +84,16 @@ export default function SharePage({
                     {new Date(checkin.startedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                  </span>
             </div>
-            <CardTitle className="text-2xl">Check-in Details</CardTitle>
-            <CardDescription>ID: <span className="font-mono text-xs">{unwrappedParams.shareId}</span></CardDescription>
+            <div className="flex items-center gap-4">
+              <Avatar className="h-16 w-16 border-2 border-background shadow-sm">
+                <AvatarImage src={checkin.userImageUrl} />
+                <AvatarFallback>?</AvatarFallback>
+              </Avatar>
+              <div>
+                <CardTitle className="text-2xl">Check-in Details</CardTitle>
+                <CardDescription>ID: <span className="font-mono text-xs">{unwrappedParams.shareId}</span></CardDescription>
+              </div>
+            </div>
         </CardHeader>
         
         <CardContent className="space-y-6">
@@ -94,6 +117,13 @@ export default function SharePage({
                     <span className="font-mono text-sm tabular-nums">{checkin.lng.toFixed(6)}</span>
                  </div>
             </div>
+
+            {currentUser && !isSelf && (
+              <Button onClick={handleSayHello} className="w-full" size="lg">
+                <Hand className="mr-2 h-4 w-4" />
+                Say Hello 👋
+              </Button>
+            )}
 
             <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground border-t border-border/40 pt-6">
                 <Clock size={12} />

@@ -111,6 +111,17 @@ export const internalCreateCheckin = internalMutation({
       )
       .unique();
 
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk", (q) => q.eq("clerkId", clerkId))
+      .unique();
+
+    if (user) {
+      await ctx.db.patch(user._id, {
+        checkinsCount: (user.checkinsCount ?? 0) + 1,
+      });
+    }
+
     if (existing && now - existing.startedAt < CHECKIN_TTL_MS) {
       throw new Error("You already have an active check-in.");
     }

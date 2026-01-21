@@ -10,7 +10,19 @@ export default defineSchema({
     bio: v.optional(v.string()),
     links: v.optional(v.array(v.string())),
     updatedAt: v.number(),
+    checkinsCount: v.number(),
   }).index("by_clerk", ["clerkId"]),
+
+  notifications: defineTable({
+    clerkId: v.string(),
+    type: v.string(),
+    imagePayloadUrl: v.string(),
+    action: v.string(),
+    read: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index("by_clerk", ["clerkId"])
+    .index("by_clerk_read", ["clerkId", "read"]),
 
   checkins: defineTable({
     clerkId: v.string(),

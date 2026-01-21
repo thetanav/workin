@@ -37,6 +37,28 @@ export const getByClerkId = query({
   },
 });
 
+export const sayHello = mutation({
+  args: { clerkId: v.string() },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (identity === null) throw new Error("Unauthorized");
+
+    const sender = await ctx.db
+      .query("users")
+      .withIndex("by_clerk", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    await ctx.db.insert("notifications", {
+      clerkId: args.clerkId,
+      type: "say-hello",
+      imagePayloadUrl: sender?.imageUrl || identity.pictureUrl || "",
+      action: "say-hello",
+      read: false,
+      createdAt: Date.now(),
+    });
+  },
+});
+
 export const updateProfile = mutation({
   args: {
     bio: v.optional(v.string()),
@@ -75,7 +97,7 @@ export const upsertFromClerk = internalMutation({
       .withIndex("by_clerk", (q) => q.eq("clerkId", data.id))
       .unique();
     if (user === null) {
-      await ctx.db.insert("users", userAttributes);
+      await ctx.db.insert("users", { ...userAttributes, checkinsCount: 0 });
     } else {
       await ctx.db.patch(user._id, userAttributes);
     }
