@@ -12,6 +12,9 @@ export type MapCheckin = {
   lng: number;
   note?: string;
   shareId: string;
+  userImageUrl?: string;
+  placeName?: string;
+  clerkId: string;
 };
 
 export function useMapCheckins(center: { lat: number; lng: number }) {
@@ -31,6 +34,9 @@ export function useMapCheckins(center: { lat: number; lng: number }) {
       lng: c.lng,
       note: c.note ?? undefined,
       shareId: c._id,
+      userImageUrl: c.userImageUrl,
+      placeName: c.placeName,
+      clerkId: c.clerkId,
     }));
   }, [res]);
 

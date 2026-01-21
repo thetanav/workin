@@ -28,25 +28,25 @@ export function NotificationsMenu() {
     try {
       await markAsRead({ notificationId: id });
     } catch (error) {
-        console.error(error);
+      console.error(error);
       toast.error("Failed to mark as read");
     }
   };
 
   const handleClearAll = async () => {
-      try {
-          await clearAll();
-          toast.success("All notifications cleared");
-      } catch (error) {
-          console.error(error);
-          toast.error("Failed to clear notifications");
-      }
-  }
+    try {
+      await clearAll();
+      toast.success("All notifications cleared");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to clear notifications");
+    }
+  };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
+        <Button variant="ghost" className="relative">
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-600 ring-2 ring-background" />
@@ -55,16 +55,23 @@ export function NotificationsMenu() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80">
         <DropdownMenuLabel className="flex items-center justify-between">
-            <span>Notifications</span>
-            {unreadCount > 0 && (
-                <Button variant="ghost" size="sm" className="h-auto px-2 text-xs" onClick={handleClearAll}>
-                    Clear all
-                </Button>
-            )}
+          <span>Notifications</span>
+          {unreadCount > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-auto px-2 text-xs"
+              onClick={handleClearAll}
+            >
+              Clear all
+            </Button>
+          )}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {notifications === undefined ? (
-           <div className="p-4 text-center text-sm text-muted-foreground">Loading...</div>
+          <div className="p-4 text-center text-sm text-muted-foreground">
+            Loading...
+          </div>
         ) : notifications.length === 0 ? (
           <div className="p-4 text-center text-sm text-muted-foreground">
             No new notifications
@@ -75,8 +82,8 @@ export function NotificationsMenu() {
               key={n._id}
               className="flex items-start gap-3 p-3 cursor-pointer"
               onSelect={(e) => {
-                  e.preventDefault();
-                  handleMarkAsRead(n._id);
+                e.preventDefault();
+                handleMarkAsRead(n._id);
               }}
             >
               <Avatar className="h-8 w-8">
@@ -85,7 +92,9 @@ export function NotificationsMenu() {
               </Avatar>
               <div className="flex flex-col gap-1">
                 <p className="text-sm font-medium leading-none">
-                  {n.type === "say-hello" ? "Someone said Hello! 👋" : "New notification"}
+                  {n.type === "say-hello"
+                    ? "Someone said Hello! 👋"
+                    : "New notification"}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {new Date(n.createdAt).toLocaleTimeString()}

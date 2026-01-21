@@ -25,7 +25,7 @@ function MapWithCheckins({ center }: { center: { lat: number; lng: number } }) {
       onCheckin={(shareId) => {
         window.location.href = `/c/${shareId}`;
       }}
-      className="h-[50rem] w-full rounded-none border-0"
+      className="h- w-full rounded-none border-0"
     />
   );
 }
@@ -40,15 +40,15 @@ export default function Home() {
   return (
     <>
       {!coords ? (
-        <div className="flex h-[calc(100vh-64px)] items-center justify-center">
+        <div className="flex h-full items-center justify-center">
           <LocationGate onReady={setCoords} onError={setLocationError} />
         </div>
       ) : (
         <div className="relative h-full w-full overflow-hidden">
-          <div className="">
+          <div className="h-full flex">
             <MapWithCheckins center={coords} />
           </div>
-          <div className="absolute bottom-4 right-4 z-10 w-full max-w-sm px-4 md:px-0 md:bottom-8 md:right-8">
+          <div className="absolute bottom-2 left-2 z-10 w-full max-w-sm">
             <CheckinPanel coords={coords} />
           </div>
         </div>

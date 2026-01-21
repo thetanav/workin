@@ -7,7 +7,7 @@ import { api } from "@/convex/_generated/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { ExternalLink, Github, Mail, Globe, ArrowLeft } from "lucide-react";
+import { ExternalLink, Github, Mail, Globe } from "lucide-react";
 
 export default function UserProfile({
   params,
@@ -17,7 +17,6 @@ export default function UserProfile({
   const { userId } = React.use(params);
 
   const user = useQuery(api.users.getById, { userId });
-  console.log("user: ", user);
 
   const isLoading = user === undefined;
   const notFound = user === null;
@@ -44,28 +43,17 @@ export default function UserProfile({
   }
 
   return (
-    <div className="container mx-auto max-w-2xl px-4 py-12 md:py-20">
-      <Link
-        href="/"
-        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors"
-      >
-        <ArrowLeft size={16} />
-        Back to Map
-      </Link>
-
-      <Card className="overflow-hidden border-border/50 bg-card/60 backdrop-blur-xl shadow-2xl">
-        <div className="h-32 bg-gradient-to-r from-primary/10 via-primary/5 to-background border-b border-border/40"></div>
+    <div className="h-full w-full flex items-center justify-center">
+      <Card className="overflow-hidden border-border/50 bg-card/60 w-108">
         <CardContent className="relative pt-0 pb-8 px-8">
-          <div className="absolute -top-16 left-8">
-            <Avatar className="h-32 w-32 border-4 border-background shadow-xl rounded-2xl">
-              <AvatarImage src={user.imageUrl} alt={user.name} />
-              <AvatarFallback className="text-3xl rounded-2xl">
-                {user.name.slice(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-          </div>
+          <Avatar className="h-32 w-32">
+            <AvatarImage src={user.imageUrl} alt={user.name} />
+            <AvatarFallback className="text-3xl rounded-2xl">
+              {user.name.slice(0, 2).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
 
-          <div className="pt-20 space-y-6">
+          <div className="pt-10 space-y-6">
             <div>
               <h1 className="text-3xl font-bold tracking-tight display-font">
                 {user.name}

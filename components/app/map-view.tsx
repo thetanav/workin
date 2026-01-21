@@ -8,12 +8,18 @@ import {
   MapMarker,
   MapPopup,
   MarkerContent,
+  MarkerPopup,
 } from "@/components/ui/map";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Users, ExternalLink, Clock } from "lucide-react";
+import { ExternalLink, Clock, MapPinCheck, X } from "lucide-react";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { useAuth } from "@clerk/nextjs";
+import { toast } from "sonner";
+import { useTheme } from "next-themes";
+import Link from "next/link";
 
 export type MapCheckin = {
   id: string;
@@ -22,70 +28,81 @@ export type MapCheckin = {
   note?: string;
   shareId: string;
   userImageUrl?: string;
-  name?: string;
+  placeName?: string;
+  userName?: string;
+  clerkId: string;
 };
-
-function formatApproxDistanceMeters(
-  a: { lat: number; lng: number },
-  b: { lat: number; lng: number },
-): string {
-  const toRad = (x: number) => (x * Math.PI) / 180;
-  const R = 6371000;
-  const dLat = toRad(b.lat - a.lat);
-  const dLng = toRad(b.lng - a.lng);
-  const lat1 = toRad(a.lat);
-  const lat2 = toRad(b.lat);
-
-  const h =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
-  const c = 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
-  const d = R * c;
-
-  if (d < 1000) return `${Math.round(d)}m`;
-  return `${(d / 1000).toFixed(1)}km`;
-}
-
-function initials(name?: string) {
-  const n = (name ?? "").trim();
-  if (!n) return "?";
-  const parts = n.split(/\s+/).filter(Boolean);
-  const a = parts[0]?.[0] ?? "";
-  const b = parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? "") : "";
-  return (a + b).toUpperCase();
-}
 
 export function MapView({
   center,
   checkins,
   onCheckin,
   className,
+  selectedId: controlledSelectedId,
+  onSelectId: controlledOnSelectId,
 }: {
   center: { lat: number; lng: number };
   checkins: MapCheckin[];
   onCheckin?: (shareId: string) => void;
   className?: string;
+  selectedId?: string | null;
+  onSelectId?: (id: string | null) => void;
 }) {
-  const [open, setOpen] = React.useState<string | null>(null);
+  const [internalOpen, setInternalOpen] = React.useState<string | null>(null);
+
+  const isControlled = controlledSelectedId !== undefined;
+  const open = isControlled ? controlledSelectedId : internalOpen;
+  const setOpen = React.useCallback(
+    (id: string | null) => {
+      if (controlledOnSelectId) {
+        controlledOnSelectId(id);
+      }
+      if (!isControlled) {
+        setInternalOpen(id);
+      }
+    },
+    [controlledOnSelectId, isControlled],
+  );
+
+  const { userId } = useAuth();
+  const sayHello = useMutation(api.users.sayHello);
+  const { resolvedTheme } = useTheme();
+
+  const handleSayHi = async (clerkId: string) => {
+    if (!userId) {
+      toast.error("Please sign in to say hi!");
+      return;
+    }
+    if (clerkId === userId) {
+      toast.error("You can't say hi to yourself!");
+      return;
+    }
+    try {
+      await sayHello({ clerkId });
+      toast.success("Said hi! 👋");
+    } catch {
+      toast.error("Failed to say hi");
+    }
+  };
 
   return (
     <Card
       className={`overflow-hidden border-border/40 bg-card/30 backdrop-blur-sm p-0 shadow-2xl ${className}`}
     >
       <div className="h-full w-full relative">
-        <Map center={[center.lng, center.lat]} zoom={13} theme="light">
-          <MapControls showLocate showFullscreen position="bottom-right" />
+        <Map center={[center.lng, center.lat]} zoom={13} theme={resolvedTheme === "dark" ? "dark" : "light"}>
+          <MapControls showLocate position="bottom-right" />
 
           {/* User Marker */}
-          <MapMarker
+          {/*<MapMarker
             longitude={center.lng}
             latitude={center.lat}
-            className="z-50"
+            className="z-50 opacity-0"
           >
             <MarkerContent>
               <div className="h-6 w-6 rounded-full border-[3px] border-white bg-blue-500 shadow-lg flex items-center justify-center" />
             </MarkerContent>
-          </MapMarker>
+          </MapMarker>*/}
 
           {/* Check-in markers */}
           {checkins.map((c) => (
@@ -100,18 +117,40 @@ export function MapView({
             >
               <MarkerContent>
                 <div className="group relative transition-transform">
-                  <Avatar className="absolute left-1/2 right-1/2 -translate-x-1/2 -top-12 h-10 w-10 border-2 border-white shadow-lg ring-1 ring-black/5">
-                    <AvatarImage src={c.userImageUrl} alt={c.name} />
+                  <Avatar className="h-10 w-10 ring-2 ring-red-500">
+                    <AvatarImage src={c.userImageUrl} alt="user image" />
                     <AvatarFallback className="bg-primary text-[10px] text-primary-foreground font-bold">
-                      {initials(c.name)}
+                      UN
                     </AvatarFallback>
                   </Avatar>
-                  <div className="absolute -top-10 left-9 bg-background px-3 p-1 rounded-md text-sm scale-95 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition origin-left border shadow">
-                    {c.note}
-                  </div>
-                  <div className="h-4 w-4 rounded-full border-2 border-white bg-red-500" />
                 </div>
               </MarkerContent>
+               <MarkerPopup className="p-4 w-64 sm:w-62 h-fit mb-6 z-50">
+                 <p className="text-sm sm:text-lg line-clamp-3 text-ellipsis">{c.note}</p>
+                 <div className="flex items-center gap-2 mt-2">
+                   <Avatar className="w-6 h-6">
+                     <AvatarImage src={c.userImageUrl} alt={"user image"} />
+                     <AvatarFallback className="bg-primary text-[10px] text-primary-foreground font-bold">
+                       UN
+                     </AvatarFallback>
+                   </Avatar>
+                   <p className="text-sm text-muted-foreground truncate">{c.placeName}</p>
+                 </div>
+                 <div className="flex gap-2 mt-3">
+                   <Link className="flex-1" href={"/c/" + c.id}>
+                     <Button variant={"outline"} className="w-full h-9 text-sm">
+                       Open
+                     </Button>
+                   </Link>
+                   <Button 
+                     variant={"ghost"} 
+                     className="flex-1 h-9 text-sm"
+                     onClick={() => handleSayHi(c.clerkId)}
+                   >
+                     Say hi
+                   </Button>
+                 </div>
+               </MarkerPopup>
             </MapMarker>
           ))}
 
@@ -127,49 +166,62 @@ export function MapView({
                     latitude={c.lat}
                     onClose={() => setOpen(null)}
                   >
-                    <Card className="border-border/60 bg-card/80 backdrop-blur p-4 w-[280px]">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="text-sm font-semibold flex items-center gap-2">
+                    <Card className="border-border/60 bg-card/95 backdrop-blur p-4 w-[280px] sm:w-[320px] max-w-[90vw]">
+                      <div className="flex items-start justify-between gap-3 mb-3">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold flex items-center gap-2 mb-2">
                             <span className="inline-flex items-center gap-1">
-                              <Users size={14} />
-                              {c.name || "Builder"}
+                              <MapPinCheck size={14} />
+                              <span className="truncate">{c.placeName}</span>
                             </span>
-                            <Badge variant="secondary" className="text-[10px]">
-                              {formatApproxDistanceMeters(center, c)} away
-                            </Badge>
                           </p>
                           {c.note ? (
-                            <p className="mt-2 text-sm text-muted-foreground line-clamp-3">
+                            <p className="text-sm text-muted-foreground line-clamp-3 mb-3">
                               {c.note}
                             </p>
                           ) : null}
                         </div>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setOpen(null)}
+                          className="h-8 w-8 p-0 shrink-0"
+                        >
+                          <X size={16} />
+                        </Button>
                       </div>
 
-                      <div className="mt-4 grid grid-cols-2 gap-2">
+                      <div className="mt-4 grid grid-cols-3 gap-2">
                         <Button
                           size="sm"
                           variant="secondary"
                           onClick={() => {
                             onCheckin?.(c.shareId);
                           }}
-                          className="w-full"
+                          className="w-full h-9 text-sm"
                         >
                           Open
-                          <ExternalLink size={14} />
+                          <ExternalLink size={14} className="ml-1" />
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => setOpen(null)}
-                          className="w-full"
+                          className="w-full h-9 text-sm"
                         >
                           Close
                         </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleSayHi(c.clerkId)}
+                          className="w-full h-9 text-sm"
+                        >
+                          👋 Hi
+                        </Button>
                       </div>
 
-                      <div className="mt-3 flex items-center justify-between text-[10px] text-muted-foreground">
+                      <div className="mt-3 flex items-center justify-between text-[10px] text-muted-foreground border-t border-border/40 pt-3">
                         <span className="font-mono">
                           {c.lat.toFixed(4)}, {c.lng.toFixed(4)}
                         </span>

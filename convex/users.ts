@@ -43,6 +43,21 @@ export const sayHello = mutation({
     const identity = await ctx.auth.getUserIdentity();
     if (identity === null) throw new Error("Unauthorized");
 
+    // Prevent self-notification
+    if (args.clerkId === identity.subject) {
+      throw new Error("Cannot send notification to yourself");
+    }
+
+    // Check if target user exists
+    const targetUser = await ctx.db
+      .query("users")
+      .withIndex("by_clerk", (q) => q.eq("clerkId", args.clerkId))
+      .unique();
+
+    if (!targetUser) {
+      throw new Error("User not found");
+    }
+
     const sender = await ctx.db
       .query("users")
       .withIndex("by_clerk", (q) => q.eq("clerkId", identity.subject))

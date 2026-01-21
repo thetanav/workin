@@ -47,6 +47,19 @@ export function useCurrentLocation() {
     );
   }, []);
 
+  // Auto-request location on mount if permission is already granted
+  React.useEffect(() => {
+    if ("permissions" in navigator) {
+      navigator.permissions.query({ name: "geolocation" }).then((result) => {
+        if (result.state === "granted") {
+          request();
+        }
+      }).catch(() => {
+        // Ignore permission query errors, fallback to manual request
+      });
+    }
+  }, [request]);
+
   return { state, request };
 }
 

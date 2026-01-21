@@ -85,23 +85,35 @@ export function CheckinPanel({
   }
 
   return (
-    <Card className="overflow-hidden border bg-background shadow-sm">
-      <div className="p-6">
-        <div className="flex flex-col gap-6">
+    <Card className="overflow-hidden border bg-background shadow-lg p-0 mx-4 mb-4">
+      <div className="p-4 sm:p-6">
+        <div className="flex flex-col gap-4 sm:gap-6">
           <div className="flex items-center justify-between gap-4">
-            <div className="space-y-1">
-              <h3 className="font-semibold leading-none tracking-tight">Status</h3>
-              <p className="text-xs text-muted-foreground font-mono">
+            <div className="space-y-1 flex-1 min-w-0">
+              <h3 className="font-semibold leading-none tracking-tight text-sm sm:text-base">
+                Status
+              </h3>
+              <p className="text-xs text-muted-foreground font-mono truncate">
                 {coords.lat.toFixed(4)}, {coords.lng.toFixed(4)}
               </p>
             </div>
             {!canUse ? (
-              <Badge variant="outline" className="text-muted-foreground">
+              <Badge variant="outline" className="text-muted-foreground text-xs shrink-0">
                 Sign in required
               </Badge>
             ) : (
-              <div className={cn("flex items-center gap-2 text-xs font-medium", shareId ? "text-green-600" : "text-muted-foreground")}>
-                <div className={cn("h-2 w-2 rounded-full", shareId ? "bg-green-600" : "bg-muted-foreground")} />
+              <div
+                className={cn(
+                  "flex items-center gap-2 text-xs font-medium shrink-0",
+                  shareId ? "text-green-600" : "text-muted-foreground",
+                )}
+              >
+                <div
+                  className={cn(
+                    "h-2 w-2 rounded-full",
+                    shareId ? "bg-green-600" : "bg-muted-foreground",
+                  )}
+                />
                 {shareId ? "Live" : "Ready"}
               </div>
             )}
@@ -110,7 +122,10 @@ export function CheckinPanel({
           {!shareId ? (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="note" className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <Label
+                  htmlFor="note"
+                  className="text-xs font-medium uppercase tracking-wider text-muted-foreground"
+                >
                   Activity
                 </Label>
                 <Textarea
@@ -119,51 +134,52 @@ export function CheckinPanel({
                   onChange={(e) => setNote(e.target.value)}
                   placeholder="What are you building?"
                   disabled={!canUse}
-                  className="min-h-[100px] resize-none"
+                  className="min-h-[80px] sm:min-h-[100px] resize-none text-sm"
                 />
               </div>
-              
+
               <Button
                 onClick={onCreate}
                 disabled={!canUse || creating}
-                className="w-full"
+                className="w-full h-12 text-base font-medium"
+                size="lg"
               >
                 {creating ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     Checking in...
                   </>
                 ) : (
                   <>
                     Check In
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    <ArrowRight className="ml-2 h-5 w-5" />
                   </>
                 )}
               </Button>
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="rounded-lg border bg-muted/50 p-4">
+              <div className="rounded-lg border bg-muted/50 p-3 sm:p-4">
                 <div className="flex items-center gap-3">
-                  <MapPin className="h-5 w-5 text-muted-foreground" />
-                  <div>
+                  <MapPin className="h-5 w-5 text-muted-foreground shrink-0" />
+                  <div className="min-w-0">
                     <p className="text-sm font-medium">Checked in</p>
-                    <p className="text-xs text-muted-foreground">Visible on map</p>
+                    <p className="text-xs text-muted-foreground">
+                      Visible on map
+                    </p>
                   </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <Button variant="outline" asChild className="w-full">
-                  <Link href={`/c/${shareId}`}>
-                    Share
-                  </Link>
+                <Button variant="outline" asChild className="w-full h-11">
+                  <Link href={`/c/${shareId}`}>Share</Link>
                 </Button>
                 <Button
                   variant="outline"
                   onClick={onEnd}
                   disabled={!canUse}
-                  className="w-full text-destructive hover:text-destructive"
+                  className="w-full h-11 text-destructive hover:text-destructive"
                 >
                   <XCircle className="mr-2 h-4 w-4" />
                   End

@@ -11,9 +11,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Loader2, ExternalLink, Timer, XCircle } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { Loader2, ExternalLink, Timer, MapPin, Radio } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
 
 function timeAgo(timestamp: number) {
   const seconds = Math.floor((Date.now() - timestamp) / 1000);
@@ -23,6 +30,15 @@ function timeAgo(timestamp: number) {
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return `${hours}h ago`;
   return `${Math.floor(hours / 24)}d ago`;
+}
+
+function initials(name?: string) {
+  const n = (name ?? "").trim();
+  if (!n) return "?";
+  const parts = n.split(/\s+/).filter(Boolean);
+  const a = parts[0]?.[0] ?? "";
+  const b = parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? "") : "";
+  return (a + b).toUpperCase();
 }
 
 export default function ProfileSettingsPage() {
@@ -76,111 +92,164 @@ export default function ProfileSettingsPage() {
     }
   }
 
-  return (
-    <div className="mx-auto max-w-2xl px-4 py-8">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
-          <p className="text-sm text-muted-foreground">Manage your profile.</p>
-        </div>
-        {user && (
-          <Button asChild variant="ghost" size="sm" className="gap-2">
-            <Link href={`/p/${user._id}`}>
-              View Public Page
-              <ExternalLink size={14} />
-            </Link>
-          </Button>
-        )}
+  if (user === undefined) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
+    );
+  }
 
-      <div className="grid gap-8">
-        {!user ? (
-          <div className="rounded-lg border border-dashed p-8 text-center">
-             <p className="text-sm text-muted-foreground">Please sign in to view your settings.</p>
+  return (
+    <div className="mx-auto max-w-3xl px-4 py-8 md:py-12 pb-24">
+      <div className="flex flex-col gap-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+            <p className="text-muted-foreground mt-1">
+              Manage your profile and active sessions.
+            </p>
           </div>
+          {user && (
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="gap-2 w-full sm:w-auto"
+            >
+              <Link href={`/p/${user._id}`}>
+                View Public Page
+                <ExternalLink size={14} />
+              </Link>
+            </Button>
+          )}
+        </div>
+
+        {!user ? (
+          <Card className="border-dashed">
+            <CardContent className="flex flex-col items-center justify-center p-8 text-center">
+              <p className="text-sm text-muted-foreground">
+                Please sign in to view your settings.
+              </p>
+            </CardContent>
+          </Card>
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-6">
             {myActive && (
-              <Card className="p-4 border-primary/20 bg-primary/5">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold text-primary flex items-center gap-2">
-                        <Timer className="h-4 w-4" />
-                        Active Session
-                      </h3>
-                      <Badge variant="outline" className="bg-background text-xs font-normal">
-                        Started {timeAgo(myActive.startedAt)}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-                      {myActive.note || "No note provided."}
-                    </p>
-                  </div>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    className="gap-2 shrink-0 ml-4"
-                    onClick={onStopSession}
-                    disabled={isStopping}
-                  >
-                    {isStopping ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <XCircle className="h-4 w-4" />
-                    )}
-                    Stop Session
-                  </Button>
+              <Card className="border-primary/20 bg-primary/5 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+                  <Radio className="h-24 w-24 text-primary" />
                 </div>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg font-semibold flex items-center gap-2 text-primary">
+                      <span className="relative flex h-3 w-3">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+                      </span>
+                      Active Session
+                    </CardTitle>
+                    <Badge variant="secondary" className="font-mono text-xs">
+                      {timeAgo(myActive.startedAt)}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-col gap-4">
+                    <div className="space-y-1">
+                      <div className="flex items-start gap-2 text-sm font-medium">
+                        <MapPin className="h-4 w-4 mt-0.5 text-muted-foreground" />
+                        <span>{myActive.placeName || "Unknown Location"}</span>
+                      </div>
+                      {myActive.note && (
+                        <p className="text-sm text-muted-foreground pl-6">
+                          &ldquo;{myActive.note}&rdquo;
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex justify-end pt-2">
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="w-full sm:w-auto gap-2"
+                        onClick={onStopSession}
+                        disabled={isStopping}
+                      >
+                        {isStopping ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Timer className="h-4 w-4" />
+                        )}
+                        Stop Session
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
               </Card>
             )}
 
-            <div className="flex items-center gap-4 pb-6 border-b">
-                <div className="h-16 w-16 rounded-full bg-muted overflow-hidden shrink-0 border">
-                  {user.imageUrl && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={user.imageUrl} alt={user.name} className="h-full w-full object-cover" />
-                  )}
+            <Card className="border-none p-0 shadow-none">
+              <CardContent className="space-y-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  <Avatar className="h-12 w-12 border">
+                    <AvatarImage src={user.imageUrl} alt={user.name} />
+                    <AvatarFallback>{initials(user.name)}</AvatarFallback>
+                  </Avatar>
+                  <div className="space-y-1">
+                    <h3 className="font-medium leading-none">{user.name}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {user.email}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold">{user.name}</h3>
-                  <p className="text-sm text-muted-foreground">{user.email}</p>
+
+                <Separator />
+
+                <div className="grid gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="bio">Bio</Label>
+                    <Textarea
+                      id="bio"
+                      value={bio}
+                      onChange={(e) => setBio(e.target.value)}
+                      placeholder="Tell us what you're building..."
+                      className="min-h-[100px] resize-none"
+                    />
+                    <p className="text-[10px] text-muted-foreground">
+                      Brief description for your profile.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="links">Links</Label>
+                    <Input
+                      id="links"
+                      value={links}
+                      onChange={(e) => setLinks(e.target.value)}
+                      placeholder="github.com/u/..., twitter.com/..."
+                      inputMode="url"
+                    />
+                    <p className="text-[10px] text-muted-foreground">
+                      Comma separated URLs
+                    </p>
+                  </div>
                 </div>
-            </div>
 
-            <div className="grid gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="bio">Bio</Label>
-                <Textarea
-                  id="bio"
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
-                  placeholder="Tell us what you're building..."
-                  className="min-h-[100px] resize-none"
-                />
-                <p className="text-[10px] text-muted-foreground">
-                  Brief description for your profile.
-                </p>
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="links">Links</Label>
-                <Input
-                  id="links"
-                  value={links}
-                  onChange={(e) => setLinks(e.target.value)}
-                  placeholder="github.com/u/..., twitter.com/..."
-                />
-                <p className="text-[10px] text-muted-foreground">Comma separated URLs</p>
-              </div>
-
-              <div className="flex justify-end pt-4">
-                <Button onClick={onSave} disabled={isSaving}>
-                  {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Save Changes
-                </Button>
-              </div>
-            </div>
+                <div className="flex justify-end pt-2">
+                  <Button
+                    onClick={onSave}
+                    disabled={isSaving}
+                    className="w-full sm:w-auto"
+                  >
+                    {isSaving && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    Save Changes
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         )}
       </div>
