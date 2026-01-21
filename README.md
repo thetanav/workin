@@ -1,20 +1,20 @@
-# Joinin
+# workin
 
 **The location-based social workspace for builders.**
 
 ![Project Status](https://img.shields.io/badge/status-active-success.svg)
 ![License](https://img.shields.io/badge/license-Private-blue.svg)
 
-Joinin helps remote workers, indie hackers, and developers find each other. Check in at your current workspace (coffee shop, library, coworking space), see who else is grinding nearby, and connect IRL.
+workin helps remote workers, indie hackers, and developers find each other. Check in at your current workspace (coffee shop, library, coworking space), see who else is grinding nearby, and connect IRL.
 
 ## 📚 Key Terminologies
 
-- **Builders**: Users of Joinin, typically remote workers, indie hackers, and developers who use the app to connect.
+- **Builders**: Users of workin, typically remote workers, indie hackers, and developers who use the app to connect.
 - **Check-in**: The action of sharing your current location and work status at a workspace, making you visible to nearby builders.
 - **Status**: Your current work mode or availability (e.g., "Deep Work" for focused sessions, "Open to Chat" for social interactions).
 - **Wave**: A quick, non-intrusive way to greet nearby builders and start conversations.
 - **Venue/Space**: Physical locations where builders work, such as coffee shops, libraries, coworking spaces, or offices.
-- **Workspace**: Any environment where productive work happens, often referring to shared or public spaces in the context of Joinin.
+- **Workspace**: Any environment where productive work happens, often referring to shared or public spaces in the context of workin.
 
 ## 🛠 Tech Stack
 
@@ -42,7 +42,7 @@ Follow these steps to get the project running locally.
 1. **Clone the repository**
    ```bash
    git clone <your-repo-url>
-   cd joinin
+   cd workin
    ```
 
 2. **Install dependencies**

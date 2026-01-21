@@ -19,12 +19,12 @@ export default function Home() {
           </div>
 
           <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
-            Welcome to <span className="text-primary">Joinin</span>
+            Welcome to <span className="text-primary">workin</span>
           </h1>
 
           <p className="mt-6 text-lg text-muted-foreground sm:text-xl">
-            The location-based social workspace for builders. Connect with remote workers,
-            indie hackers, and developers working nearby.
+            The location-based social workspace for builders. Connect with
+            remote workers, indie hackers, and developers working nearby.
           </p>
 
           <div className="mt-10 flex items-center justify-center gap-x-6">
@@ -42,7 +42,9 @@ export default function Home() {
       <div className="bg-muted/50 py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold tracking-tight">How Joinin Helps</h2>
+            <h2 className="text-3xl font-bold tracking-tight">
+              How workin Helps
+            </h2>
             <p className="mt-4 text-lg text-muted-foreground">
               Discover and connect with the builder community in your area
             </p>
@@ -58,7 +60,8 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  Share your workspace and status in real-time. Let others know you're "Deep Work" or "Open to Chat".
+                  Share your workspace and status in real-time. Let others know
+                  you're "Deep Work" or "Open to Chat".
                 </p>
               </CardContent>
             </Card>
@@ -72,7 +75,8 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  See who else is grinding nearby. Discover remote workers, indie hackers, and developers in your area.
+                  See who else is grinding nearby. Discover remote workers,
+                  indie hackers, and developers in your area.
                 </p>
               </CardContent>
             </Card>
@@ -86,7 +90,8 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  Turn virtual networks into real-life relationships. Connect at coffee shops, libraries, and coworking spaces.
+                  Turn virtual networks into real-life relationships. Connect at
+                  coffee shops, libraries, and coworking spaces.
                 </p>
               </CardContent>
             </Card>
@@ -100,7 +105,8 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  Instant updates when builders check in or move. Stay connected with the community around you.
+                  Instant updates when builders check in or move. Stay connected
+                  with the community around you.
                 </p>
               </CardContent>
             </Card>
@@ -115,7 +121,8 @@ export default function Home() {
             Ready to join the builder community?
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Check in at your workspace and start connecting with like-minded creators.
+            Check in at your workspace and start connecting with like-minded
+            creators.
           </p>
           <div className="mt-8">
             <Link href="/nearby">
