@@ -15,6 +15,8 @@ export default defineSchema({
 
   notifications: defineTable({
     clerkId: v.string(),
+    fromClerkId: v.optional(v.string()),
+    checkinId: v.optional(v.id("checkins")),
     type: v.string(),
     imagePayloadUrl: v.string(),
     action: v.string(),
@@ -34,5 +36,6 @@ export default defineSchema({
     active: v.boolean(),
     startedAt: v.number(),
     endedAt: v.optional(v.number()),
+    participants: v.optional(v.array(v.string())),
   }).index("by_clerk_active", ["clerkId", "active"]),
 });

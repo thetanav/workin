@@ -12,11 +12,11 @@ import { ExternalLink, Github, Mail, Globe } from "lucide-react";
 export default function UserProfile({
   params,
 }: {
-  params: Promise<{ userId: string }>;
+  params: Promise<{ clerkId: string }>;
 }) {
-  const { userId } = React.use(params);
+  const { clerkId } = React.use(params);
 
-  const user = useQuery(api.users.getById, { userId });
+  const user = useQuery(api.users.getByClerkId, { clerkId });
 
   const isLoading = user === undefined;
   const notFound = user === null;

@@ -61,7 +61,7 @@ export default function Home() {
               <CardContent>
                 <p className="text-sm text-muted-foreground">
                   Share your workspace and status in real-time. Let others know
-                  you're "Deep Work" or "Open to Chat".
+                  you&apos;re &ldquo;Deep Work&rdquo; or &ldquo;Open to Chat&rdquo;.
                 </p>
               </CardContent>
             </Card>

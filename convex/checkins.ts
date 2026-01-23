@@ -67,6 +67,17 @@ export const getById = query({
   },
 });
 
+export const getAllActive = query({
+  args: {},
+  handler: async (ctx: QueryCtx) => {
+    return await ctx.db
+      .query("checkins")
+      .filter((q) => q.eq(q.field("active"), true))
+      .order("desc")
+      .take(100); // limit to 100 for performance
+  },
+});
+
 export const getMyActiveCheckin = query({
   args: {},
   handler: async (ctx: QueryCtx) => {

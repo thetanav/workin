@@ -13,25 +13,16 @@ import {
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ExternalLink, Clock, MapPinCheck, X } from "lucide-react";
+import { ExternalLink, Clock, MapPinCheck, X, Handshake, ArrowUpLeftFromCircle } from "lucide-react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useAuth } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { useTheme } from "next-themes";
 import Link from "next/link";
+import { Id } from "@/convex/_generated/dataModel";
+import { SchemaDefinition } from "convex/server";
 
-export type MapCheckin = {
-  id: string;
-  lat: number;
-  lng: number;
-  note?: string;
-  shareId: string;
-  userImageUrl?: string;
-  placeName?: string;
-  userName?: string;
-  clerkId: string;
-};
 
 export function MapView({
   center,
@@ -42,7 +33,17 @@ export function MapView({
   onSelectId: controlledOnSelectId,
 }: {
   center: { lat: number; lng: number };
-  checkins: MapCheckin[];
+  checkins: Array<{
+    id: string;
+    lat: number;
+    lng: number;
+    note: string;
+    shareId: string;
+    userImageUrl: string;
+    placeName: string;
+    clerkId: string;
+    participants?: string[];
+  }>;
   onCheckin?: (shareId: string) => void;
   className?: string;
   selectedId?: string | null;
@@ -66,6 +67,7 @@ export function MapView({
 
   const { userId } = useAuth();
   const sayHello = useMutation(api.users.sayHello);
+  const sendJoinRequest = useMutation(api.notifications.sendJoinRequest);
   const { resolvedTheme } = useTheme();
 
   const handleSayHi = async (clerkId: string) => {
@@ -85,6 +87,25 @@ export function MapView({
     }
   };
 
+  const handleSendJoinRequest = async (checkinId: Id<"checkins">, clerkId: string) => {
+    if (!userId) {
+      toast.error("Please sign in to send join request!");
+      return;
+    }
+    if (clerkId === userId) {
+      toast.error("You can't join your own check-in!");
+      return;
+    }
+    try {
+      await sendJoinRequest({ checkinId });
+      toast.success("Join request sent!");
+    } catch (error) {
+      console.error(error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to send join request";
+      toast.error(errorMessage);
+    }
+  };
+
   return (
     <Card
       className={`overflow-hidden border-border/40 bg-card/30 backdrop-blur-sm p-0 shadow-2xl ${className}`}
@@ -101,7 +122,7 @@ export function MapView({
           <MapMarker
             longitude={center.lng}
             latitude={center.lat}
-            className="z-50"
+            className="z-40"
           >
             <MarkerContent>
               <div className="h-6 w-6 rounded-full border-[3px] border-white bg-blue-500 shadow-lg flex items-center justify-center" />
@@ -121,7 +142,7 @@ export function MapView({
             >
               <MarkerContent>
                 <div className="group relative transition-transform">
-                  <Avatar className="h-10 w-10 ring-2 ring-red-500">
+                  <Avatar className="h-10 w-10 border">
                     <AvatarImage src={c.userImageUrl} alt="user image" />
                     <AvatarFallback className="bg-primary text-[10px] text-primary-foreground font-bold">
                       UN
@@ -129,120 +150,48 @@ export function MapView({
                   </Avatar>
                 </div>
               </MarkerContent>
-              <MarkerPopup className="p-4 w-64 sm:w-62 h-fit mb-6 z-50">
-                <p className="text-sm sm:text-lg line-clamp-3 text-ellipsis">
+              <MarkerPopup className="p-4 w-64 sm:w-62 h-fit mb-6 z- rounded-2xl">
+                <p className="text-sm sm:text-lg line-clamp-3 text-ellipsis font-bold">
                   {c.note}
                 </p>
-                <div className="flex items-center gap-2 mt-2">
-                  <Avatar className="w-6 h-6">
+                <p className="text-sm text-muted-foreground truncate">
+                  @ {c.placeName}
+                </p>
+                <div className="flex items-center gap-2 my-4">
+                  <Avatar className="w-8 h-8">
                     <AvatarImage src={c.userImageUrl} alt={"user image"} />
                     <AvatarFallback className="bg-primary text-[10px] text-primary-foreground font-bold">
                       UN
                     </AvatarFallback>
                   </Avatar>
-                  <p className="text-sm text-muted-foreground truncate">
-                    {c.placeName}
-                  </p>
+                  <p>{c.participants?.length ?? 0}</p>
                 </div>
-                <div className="flex gap-2 mt-3">
-                  <Link className="flex-1" href={"/c/" + c.id}>
-                    <Button variant={"outline"} className="w-full h-9 text-sm">
+                <Button 
+                  className="w-full" 
+                  variant={"secondary"}
+                  onClick={() => handleSendJoinRequest(c.id as Id<"checkins">, c.clerkId)}
+                >
+                  Request to join
+                </Button>
+                <div className="flex gap-1 mt-1">
+                  <Button variant={"outline"} className="flex-1" asChild>
+                    <Link className="flex gap-2 items-center" href={"/c/" + c.id}>
+                      <ArrowUpLeftFromCircle />
                       Open
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                   <Button
                     variant={"ghost"}
-                    className="flex-1 h-9 text-sm"
+                    className="flex-1"
                     onClick={() => handleSayHi(c.clerkId)}
                   >
+                    <Handshake />
                     Say hi
                   </Button>
                 </div>
               </MarkerPopup>
             </MapMarker>
           ))}
-
-          {/* Popup */}
-          {open
-            ? (() => {
-                const c = checkins.find((x) => x.id === open);
-                if (!c) return null;
-
-                return (
-                  <MapPopup
-                    longitude={c.lng}
-                    latitude={c.lat}
-                    onClose={() => setOpen(null)}
-                  >
-                    <Card className="border-border/60 bg-card/95 backdrop-blur p-4 w-[280px] sm:w-[320px] max-w-[90vw]">
-                      <div className="flex items-start justify-between gap-3 mb-3">
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-semibold flex items-center gap-2 mb-2">
-                            <span className="inline-flex items-center gap-1">
-                              <MapPinCheck size={14} />
-                              <span className="truncate">{c.placeName}</span>
-                            </span>
-                          </p>
-                          {c.note ? (
-                            <p className="text-sm text-muted-foreground line-clamp-3 mb-3">
-                              {c.note}
-                            </p>
-                          ) : null}
-                        </div>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => setOpen(null)}
-                          className="h-8 w-8 p-0 shrink-0"
-                        >
-                          <X size={16} />
-                        </Button>
-                      </div>
-
-                      <div className="mt-4 grid grid-cols-3 gap-2">
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => {
-                            onCheckin?.(c.shareId);
-                          }}
-                          className="w-full h-9 text-sm"
-                        >
-                          Open
-                          <ExternalLink size={14} className="ml-1" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setOpen(null)}
-                          className="w-full h-9 text-sm"
-                        >
-                          Close
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleSayHi(c.clerkId)}
-                          className="w-full h-9 text-sm"
-                        >
-                          👋 Hi
-                        </Button>
-                      </div>
-
-                      <div className="mt-3 flex items-center justify-between text-[10px] text-muted-foreground border-t border-border/40 pt-3">
-                        <span className="font-mono">
-                          {c.lat.toFixed(4)}, {c.lng.toFixed(4)}
-                        </span>
-                        <span className="inline-flex items-center gap-1">
-                          <Clock size={12} />
-                          live
-                        </span>
-                      </div>
-                    </Card>
-                  </MapPopup>
-                );
-              })()
-            : null}
         </Map>
       </div>
     </Card>

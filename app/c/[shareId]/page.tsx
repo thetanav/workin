@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MapPin, Clock, ArrowLeft, Loader2, Hand } from "lucide-react";
+import { MapPin, Clock, ArrowLeft, Loader2, Hand, Users } from "lucide-react";
 
 export default function SharePage({
   params,
@@ -116,9 +116,16 @@ export default function SharePage({
                     <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Lng</span>
                     <span className="font-mono text-sm tabular-nums">{checkin.lng.toFixed(6)}</span>
                  </div>
-            </div>
+             </div>
 
-            {currentUser && !isSelf && (
+             {checkin.participants && checkin.participants.length > 0 && (
+               <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                 <Users size={14} />
+                 {checkin.participants.length} participant{checkin.participants.length > 1 ? 's' : ''} joined
+               </div>
+             )}
+
+             {currentUser && !isSelf && (
               <Button onClick={handleSayHello} className="w-full" size="lg">
                 <Hand className="mr-2 h-4 w-4" />
                 Say Hello 👋

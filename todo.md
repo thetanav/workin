@@ -1,6 +1,9 @@
 # workin Feature Roadmap
 
 ## HIGH
+- nearby users can send request to join the checkin and then the owner of checkin can add them with just a click in notiifcations revieved
+- map shows nearby users in radius of 10kms
+- there should be a page /admin that has a map that shows all the checkins
 
 ## TODOs
 - [ ] **Future Check-ins**: "I'll be working at [Coffee Shop] tomorrow morning."

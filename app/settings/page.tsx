@@ -117,7 +117,7 @@ export default function ProfileSettingsPage() {
               size="sm"
               className="gap-2 w-full sm:w-auto"
             >
-              <Link href={`/p/${user._id}`}>
+              <Link href={`/p/${user.clerkId}`}>
                 View Public Page
                 <ExternalLink size={14} />
               </Link>

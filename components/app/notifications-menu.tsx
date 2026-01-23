@@ -21,6 +21,8 @@ export function NotificationsMenu() {
   const notifications = useQuery(api.notifications.getMyNotifications);
   const markAsRead = useMutation(api.notifications.markAsRead);
   const clearAll = useMutation(api.notifications.clearAll);
+  const acceptJoinRequest = useMutation(api.notifications.acceptJoinRequest);
+  const declineJoinRequest = useMutation(api.notifications.declineJoinRequest);
 
   const unreadCount = notifications?.length ?? 0;
 
@@ -83,24 +85,69 @@ export function NotificationsMenu() {
               className="flex items-start gap-3 p-3 cursor-pointer"
               onSelect={(e) => {
                 e.preventDefault();
-                handleMarkAsRead(n._id);
+                if (n.type !== "join-request") {
+                  handleMarkAsRead(n._id);
+                }
               }}
             >
               <Avatar className="h-8 w-8">
                 <AvatarImage src={n.imagePayloadUrl} />
                 <AvatarFallback>U</AvatarFallback>
               </Avatar>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1 flex-1">
                 <p className="text-sm font-medium leading-none">
                   {n.type === "say-hello"
                     ? "Someone said Hello! 👋"
+                    : n.type === "join-request"
+                    ? "Join Request"
                     : "New notification"}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {n.action}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {new Date(n.createdAt).toLocaleTimeString()}
                 </p>
+                {n.type === "join-request" && (
+                  <div className="flex gap-2 mt-2">
+                    <Button
+                      size="sm"
+                      variant="default"
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        try {
+                          await acceptJoinRequest({ notificationId: n._id });
+                          toast.success("Join request accepted");
+                        } catch (error) {
+                          console.error(error);
+                          toast.error("Failed to accept");
+                        }
+                      }}
+                    >
+                      Accept
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        try {
+                          await declineJoinRequest({ notificationId: n._id });
+                          toast.success("Join request declined");
+                        } catch (error) {
+                          console.error(error);
+                          toast.error("Failed to decline");
+                        }
+                      }}
+                    >
+                      Decline
+                    </Button>
+                  </div>
+                )}
               </div>
-              <div className="ml-auto h-2 w-2 rounded-full bg-blue-500" />
+              {n.type !== "join-request" && (
+                <div className="ml-auto h-2 w-2 rounded-full bg-blue-500" />
+              )}
             </DropdownMenuItem>
           ))
         )}

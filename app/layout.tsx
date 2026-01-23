@@ -38,7 +38,7 @@ export default function RootLayout({
               <main className="flex-1 h-full overflow-y-auto">{children}</main>
             </ConvexClientProvider>
           </ClerkProvider>
-          <Toaster richColors />
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>
