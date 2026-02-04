@@ -24,6 +24,7 @@ export default function AdminPage() {
     placeName: c.placeName,
     userName: "", // need to fetch user name
     clerkId: c.clerkId,
+    startedAt: c.startedAt,
   }));
 
   // Calculate center, perhaps average or default
@@ -51,11 +52,12 @@ export default function AdminPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="h-[600px] w-full">
+          <div className="h-[600px] w-full border rounded-xl overflow-hidden">
             <MapView
               center={center}
               checkins={mapCheckins}
               onCheckin={(id) => window.open(`/c/${id}`, "_blank")}
+              className="border-0 shadow-none h-full w-full rounded-none"
             />
           </div>
         </CardContent>

@@ -47,17 +47,14 @@ export function NotificationsMenu() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative">
-          <Bell className="h-5 w-5" />
-          {unreadCount > 0 && (
-            <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-600 ring-2 ring-background" />
-          )}
-        </Button>
+      <DropdownMenuTrigger className="relative">
+        <Bell className="h-5 w-5" />
+        {unreadCount > 0 && (
+          <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-600 ring-2 ring-background" />
+        )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80">
         <DropdownMenuLabel className="flex items-center justify-between">
-          <span>Notifications</span>
           {unreadCount > 0 && (
             <Button
               variant="ghost"
@@ -99,8 +96,8 @@ export function NotificationsMenu() {
                   {n.type === "say-hello"
                     ? "Someone said Hello! 👋"
                     : n.type === "join-request"
-                    ? "Join Request"
-                    : "New notification"}
+                      ? "Join Request"
+                      : "New notification"}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {n.action}

@@ -1,137 +1,68 @@
-"use client";
-
-import * as React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin, Users, Coffee, Zap, ArrowRight } from "lucide-react";
+import { MapPin, Users, Radio } from "lucide-react";
+import { LiveStats } from "@/components/app/live-stats";
 
-export default function Home() {
+export default function Page() {
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <div className="container mx-auto px-4 py-16 text-center">
-        <div className="mx-auto max-w-3xl">
-          <div className="mb-8 flex justify-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-              <MapPin className="h-8 w-8 text-primary" />
-            </div>
-          </div>
-
-          <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
-            Welcome to <span className="text-primary">workin</span>
-          </h1>
-
-          <p className="mt-6 text-lg text-muted-foreground sm:text-xl">
-            The location-based social workspace for builders. Connect with
-            remote workers, indie hackers, and developers working nearby.
-          </p>
-
-          <div className="mt-10 flex items-center justify-center gap-x-6">
+    <div className="flex flex-col items-center justify-center min-h-[80vh] px-4 text-center max-w-6xl mx-auto">
+      <div className="space-y-6 max-w-3xl">
+        <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80">
+          <span className="flex h-2 w-2 rounded-full bg-green-500 mr-2 animate-pulse"></span>
+          Now live in San Francisco
+        </div>
+        
+        <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+          Find your next <span className="text-primary">coworking</span> spot.
+        </h1>
+        
+        <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
+          See where other builders, designers, and founders are working right now. Join them, say hi, and get to work.
+        </p>
+        <LiveStats />
+        
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+          <Button size="lg" className="h-12 px-8 text-base w-full sm:w-auto gap-2" asChild>
             <Link href="/nearby">
-              <Button size="lg" className="gap-2">
-                View Nearby Builders
-                <ArrowRight className="h-4 w-4" />
-              </Button>
+              <MapPin className="h-4 w-4" />
+              Find Nearby
             </Link>
-          </div>
+          </Button>
+          <Button size="lg" variant="outline" className="h-12 px-8 text-base w-full sm:w-auto gap-2" asChild>
+            <Link href="https://github.com/thetanav/workin" target="_blank">
+              <span className="font-bold">GitHub</span>
+            </Link>
+          </Button>
         </div>
       </div>
 
-      {/* Features Section */}
-      <div className="bg-muted/50 py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold tracking-tight">
-              How workin Helps
-            </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
-              Discover and connect with the builder community in your area
-            </p>
+      <div className="mt-20 grid grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-12 w-full max-w-4xl">
+        <div className="flex flex-col items-center space-y-2">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+            <MapPin className="h-6 w-6 text-primary" />
           </div>
-
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-primary" />
-                  Live Check-ins
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Share your workspace and status in real-time. Let others know
-                  you&apos;re &ldquo;Deep Work&rdquo; or &ldquo;Open to Chat&rdquo;.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-primary" />
-                  Find Builders
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  See who else is grinding nearby. Discover remote workers,
-                  indie hackers, and developers in your area.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2">
-                  <Coffee className="h-5 w-5 text-primary" />
-                  IRL Connections
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Turn virtual networks into real-life relationships. Connect at
-                  coffee shops, libraries, and coworking spaces.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-primary" />
-                  Real-time Sync
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Instant updates when builders check in or move. Stay connected
-                  with the community around you.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-
-      {/* CTA Section */}
-      <div className="container mx-auto px-4 py-16 text-center">
-        <div className="mx-auto max-w-2xl">
-          <h2 className="text-3xl font-bold tracking-tight">
-            Ready to join the builder community?
-          </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
-            Check in at your workspace and start connecting with like-minded
-            creators.
+          <h3 className="text-xl font-bold">Live Map</h3>
+          <p className="text-sm text-muted-foreground">
+            See active check-ins on a real-time map.
           </p>
-          <div className="mt-8">
-            <Link href="/nearby">
-              <Button size="lg" className="gap-2">
-                Explore Nearby
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
+        </div>
+        <div className="flex flex-col items-center space-y-2">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+            <Users className="h-6 w-6 text-primary" />
           </div>
+          <h3 className="text-xl font-bold">Social Context</h3>
+          <p className="text-sm text-muted-foreground">
+            See who is working and what they are working on.
+          </p>
+        </div>
+        <div className="flex flex-col items-center space-y-2">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+            <Radio className="h-6 w-6 text-primary" />
+          </div>
+          <h3 className="text-xl font-bold">Broadcast</h3>
+          <p className="text-sm text-muted-foreground">
+            Let others know where you are to encourage serendipity.
+          </p>
         </div>
       </div>
     </div>

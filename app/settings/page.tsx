@@ -10,6 +10,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { Loader2, ExternalLink, Timer, MapPin, Radio } from "lucide-react";
 import {
@@ -49,6 +56,9 @@ export default function ProfileSettingsPage() {
 
   const [bio, setBio] = React.useState("");
   const [links, setLinks] = React.useState("");
+  const [defaultVisibility, setDefaultVisibility] = React.useState("public");
+  const [defaultFuzzKm, setDefaultFuzzKm] = React.useState("0");
+  const [defaultStatus, setDefaultStatus] = React.useState("Open to chat");
   const [isSaving, setIsSaving] = React.useState(false);
   const [isStopping, setIsStopping] = React.useState(false);
 
@@ -56,6 +66,9 @@ export default function ProfileSettingsPage() {
     if (!user) return;
     setBio(user.bio ?? "");
     setLinks(Array.isArray(user.links) ? user.links.join(", ") : "");
+    if (user.defaultVisibility) setDefaultVisibility(user.defaultVisibility);
+    if (user.defaultFuzzKm !== undefined) setDefaultFuzzKm(String(user.defaultFuzzKm));
+    if (user.defaultStatus) setDefaultStatus(user.defaultStatus);
   }, [user]);
 
   async function onSave() {
@@ -68,6 +81,11 @@ export default function ProfileSettingsPage() {
           .split(",")
           .map((s) => s.trim())
           .filter(Boolean),
+        defaultVisibility,
+        defaultFuzzKm: Number.isFinite(Number.parseFloat(defaultFuzzKm))
+          ? Math.max(0, Number.parseFloat(defaultFuzzKm))
+          : undefined,
+        defaultStatus: defaultStatus.trim() || undefined,
       });
       toast.success("Profile updated");
     } catch (e: unknown) {
@@ -207,6 +225,47 @@ export default function ProfileSettingsPage() {
                 <Separator />
 
                 <div className="grid gap-4">
+                  <div className="grid gap-2">
+                    <Label>Default Status</Label>
+                    <Select value={defaultStatus} onValueChange={setDefaultStatus}>
+                      <SelectTrigger className="h-10">
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Open to chat">Open to chat</SelectItem>
+                        <SelectItem value="Deep work">Deep work</SelectItem>
+                        <SelectItem value="Heads down">Heads down</SelectItem>
+                        <SelectItem value="Pairing">Pairing</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label>Default Visibility</Label>
+                    <Select value={defaultVisibility} onValueChange={setDefaultVisibility}>
+                      <SelectTrigger className="h-10">
+                        <SelectValue placeholder="Select visibility" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="public">Public</SelectItem>
+                        <SelectItem value="nearby">Nearby only</SelectItem>
+                        <SelectItem value="private">Private</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="default-fuzz">Default Location Fuzz (km)</Label>
+                    <Input
+                      id="default-fuzz"
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={defaultFuzzKm}
+                      onChange={(e) => setDefaultFuzzKm(e.target.value)}
+                    />
+                    <p className="text-[10px] text-muted-foreground">
+                      Offsets your map pin by this distance.
+                    </p>
+                  </div>
                   <div className="grid gap-2">
                     <Label htmlFor="bio">Bio</Label>
                     <Textarea

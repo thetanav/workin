@@ -67,7 +67,7 @@ export const sayHello = mutation({
       clerkId: args.clerkId,
       type: "say-hello",
       imagePayloadUrl: sender?.imageUrl || identity.pictureUrl || "",
-      action: "say-hello",
+      action: `${sender?.name || "Someone"} waved hello`,
       read: false,
       createdAt: Date.now(),
     });
@@ -78,6 +78,9 @@ export const updateProfile = mutation({
   args: {
     bio: v.optional(v.string()),
     links: v.optional(v.array(v.string())),
+    defaultVisibility: v.optional(v.string()),
+    defaultFuzzKm: v.optional(v.number()),
+    defaultStatus: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -91,6 +94,9 @@ export const updateProfile = mutation({
     await ctx.db.patch(user._id, {
       bio: args.bio,
       links: args.links,
+      defaultVisibility: args.defaultVisibility,
+      defaultFuzzKm: args.defaultFuzzKm,
+      defaultStatus: args.defaultStatus,
       updatedAt: Date.now(),
     });
   },

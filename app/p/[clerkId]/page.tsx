@@ -43,8 +43,8 @@ export default function UserProfile({
   }
 
   return (
-    <div className="h-full w-full flex items-center justify-center">
-      <Card className="overflow-hidden border-border/50 bg-card/60 w-108">
+    <div className="h-full w-full flex items-center justify-center p-4">
+      <Card className="overflow-hidden border-border/50 bg-card/60 w-full max-w-xl">
         <CardContent className="relative pt-0 pb-8 px-8">
           <Avatar className="h-32 w-32">
             <AvatarImage src={user.imageUrl} alt={user.name} />

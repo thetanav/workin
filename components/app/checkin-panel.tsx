@@ -12,6 +12,14 @@ import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { MapPin, ArrowRight, XCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -26,10 +34,14 @@ export function CheckinPanel({
   const { isLoaded, userId } = useAuth();
 
   const activeCheckin = useQuery(api.checkins.getMyActiveCheckin);
+  const user = useQuery(api.users.current);
   const create = useAction(api.checkins.createCheckin);
   const end = useMutation(api.checkins.stop);
 
   const [note, setNote] = React.useState("");
+  const [status, setStatus] = React.useState("Open to chat");
+  const [visibility, setVisibility] = React.useState("public");
+  const [fuzzKm, setFuzzKm] = React.useState("0");
 
   // Initialize with activeCheckin shareId if available
   const [shareId, setShareId] = React.useState<string | null>(null);
@@ -43,6 +55,13 @@ export function CheckinPanel({
     }
   }, [activeCheckin]);
 
+  React.useEffect(() => {
+    if (!user) return;
+    if (user.defaultStatus) setStatus(user.defaultStatus);
+    if (user.defaultVisibility) setVisibility(user.defaultVisibility);
+    if (user.defaultFuzzKm !== undefined) setFuzzKm(String(user.defaultFuzzKm));
+  }, [user]);
+
   const canUse = isLoaded && !!userId;
 
   async function onCreate() {
@@ -53,10 +72,14 @@ export function CheckinPanel({
 
     setCreating(true);
     try {
+      const fuzzValue = Number.parseFloat(fuzzKm);
       const res = (await create({
         lat: coords.lat,
         lng: coords.lng,
         note: note.trim() || "Working here",
+        status: status.trim() || undefined,
+        visibility,
+        fuzzKm: Number.isFinite(fuzzValue) ? Math.max(0, fuzzValue) : undefined,
       })) as CreateResponse;
 
       setShareId(res.id);
@@ -136,6 +159,62 @@ export function CheckinPanel({
                   disabled={!canUse}
                   className="min-h-[80px] sm:min-h-[100px] resize-none text-sm"
                 />
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    Status
+                  </Label>
+                  <Select value={status} onValueChange={setStatus} disabled={!canUse}>
+                    <SelectTrigger className="h-10">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Open to chat">Open to chat</SelectItem>
+                      <SelectItem value="Deep work">Deep work</SelectItem>
+                      <SelectItem value="Heads down">Heads down</SelectItem>
+                      <SelectItem value="Pairing">Pairing</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    Visibility
+                  </Label>
+                  <Select value={visibility} onValueChange={setVisibility} disabled={!canUse}>
+                    <SelectTrigger className="h-10">
+                      <SelectValue placeholder="Select visibility" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="public">Public</SelectItem>
+                      <SelectItem value="nearby">Nearby only</SelectItem>
+                      <SelectItem value="private">Private</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="fuzz"
+                  className="text-xs font-medium uppercase tracking-wider text-muted-foreground"
+                >
+                  Location Fuzz (km)
+                </Label>
+                <Input
+                  id="fuzz"
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={fuzzKm}
+                  onChange={(e) => setFuzzKm(e.target.value)}
+                  disabled={!canUse}
+                  className="h-10"
+                />
+                <p className="text-[10px] text-muted-foreground">
+                  Adds a small offset to protect your exact spot.
+                </p>
               </div>
 
               <Button

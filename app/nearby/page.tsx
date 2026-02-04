@@ -8,20 +8,34 @@ import { useCurrentLocation } from "@/components/app/location";
 import { CheckinPanel } from "@/components/app/checkin-panel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useAuth } from "@clerk/nextjs";
 import { Navigation, MapPin, Loader2, AlertCircle } from "lucide-react";
 
 export default function Page() {
   const { state: locationState, request: requestLocation } =
     useCurrentLocation();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [radiusKm, setRadiusKm] = useState("10");
+  const { userId } = useAuth();
 
   const coords = locationState.status === "ready" 
     ? { lat: locationState.lat, lng: locationState.lng }
     : null;
 
+  const radiusValue = Number.parseFloat(radiusKm);
+
   const nearby = useQuery(
     api.checkins.activeNearby,
-    coords ? { lat: coords.lat, lng: coords.lng } : "skip",
+    coords
+      ? { lat: coords.lat, lng: coords.lng, radiusKm: Number.isFinite(radiusValue) ? radiusValue : 10 }
+      : "skip",
   );
 
   const mapCheckins = useMemo(() => {
@@ -36,6 +50,8 @@ export default function Page() {
       placeName: c.placeName,
       clerkId: c.clerkId,
       startedAt: c.startedAt,
+      status: c.status,
+      visibility: c.visibility,
     }));
   }, [nearby]);
 
@@ -106,6 +122,31 @@ export default function Page() {
           selectedId={selectedId}
           onSelectId={setSelectedId}
         />
+      </div>
+      <div className="absolute top-2 left-2 z-10 w-full max-w-[200px]">
+        <Card className="border-border/60 bg-background/90 backdrop-blur">
+          <CardContent className="p-3 space-y-2">
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              Search Radius
+            </p>
+            <Select value={radiusKm} onValueChange={setRadiusKm}>
+              <SelectTrigger className="h-9 text-xs">
+                <SelectValue placeholder="Radius" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="2">2 km</SelectItem>
+                <SelectItem value="5">5 km</SelectItem>
+                <SelectItem value="10">10 km</SelectItem>
+                <SelectItem value="25">25 km</SelectItem>
+              </SelectContent>
+            </Select>
+            {!userId && (
+              <p className="text-[10px] text-muted-foreground">
+                Sign in to wave or join.
+              </p>
+            )}
+          </CardContent>
+        </Card>
       </div>
       <div className="absolute bottom-2 left-2 z-10 w-full max-w-sm">
         <CheckinPanel coords={coords} />

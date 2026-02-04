@@ -20,7 +20,7 @@ export default function Navbar() {
 
   return (
     <nav className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50 sticky top-0">
-      <div className="mx-auto flex items-center justify-between px-3 sm:px-4 lg:px-6 pt-2">
+      <div className="mx-auto max-w-6xl flex items-center justify-between px-3 sm:px-4 lg:px-6 pt-2">
         <div className="flex items-center gap-4 sm:gap-6">
           <Link href="/" className="flex items-center gap-1.5 font-semibold">
             <span className="font-bold text-base sm:text-lg">WorkIn</span>

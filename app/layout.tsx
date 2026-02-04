@@ -7,9 +7,7 @@ import ConvexClientProvider from "@/components/app/providers";
 import Navbar from "@/components/app/navbar";
 import { ThemeProvider } from "next-themes";
 
-const sans = Inter({
-  subsets: ["latin"],
-});
+const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
   title: "WorkIn",
@@ -22,9 +20,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html className={inter.variable} suppressHydrationWarning>
       <body
-        className={`${sans.className} antialiased h-screen max-w-5xl mx-auto flex flex-col`}
+        className={`antialiased h-screen w-full flex flex-col`}
       >
         <ThemeProvider
           attribute="class"

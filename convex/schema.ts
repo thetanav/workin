@@ -9,6 +9,9 @@ export default defineSchema({
     email: v.optional(v.string()),
     bio: v.optional(v.string()),
     links: v.optional(v.array(v.string())),
+    defaultVisibility: v.optional(v.string()),
+    defaultFuzzKm: v.optional(v.number()),
+    defaultStatus: v.optional(v.string()),
     updatedAt: v.number(),
     checkinsCount: v.number(),
   }).index("by_clerk", ["clerkId"]),
@@ -31,11 +34,23 @@ export default defineSchema({
     userImageUrl: v.string(),
     lat: v.number(),
     lng: v.number(),
+    displayLat: v.optional(v.number()),
+    displayLng: v.optional(v.number()),
     placeName: v.string(),
     note: v.string(),
+    status: v.optional(v.string()),
+    visibility: v.optional(v.string()),
     active: v.boolean(),
     startedAt: v.number(),
     endedAt: v.optional(v.number()),
     participants: v.optional(v.array(v.string())),
-  }).index("by_clerk_active", ["clerkId", "active"]),
+  })
+    .index("by_clerk_active", ["clerkId", "active"])
+    .index("by_active_started", ["active", "startedAt"]),
+
+  geocodeCache: defineTable({
+    key: v.string(),
+    placeName: v.string(),
+    updatedAt: v.number(),
+  }).index("by_key", ["key"]),
 });

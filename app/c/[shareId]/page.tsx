@@ -105,6 +105,11 @@ export default function SharePage({
                 <p className="text-lg leading-relaxed font-medium">
                   &quot;{checkin.note}&quot;
                 </p>
+                {checkin.status && (
+                  <p className="mt-2 text-xs uppercase tracking-widest text-muted-foreground">
+                    {checkin.status}
+                  </p>
+                )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -118,6 +123,11 @@ export default function SharePage({
                  </div>
              </div>
 
+             <div className="flex items-center gap-2 text-sm text-muted-foreground">
+               <MapPin size={14} />
+               {checkin.placeName || "Unknown place"}
+             </div>
+
              {checkin.participants && checkin.participants.length > 0 && (
                <div className="flex items-center gap-2 text-sm text-muted-foreground">
                  <Users size={14} />
@@ -128,8 +138,13 @@ export default function SharePage({
              {currentUser && !isSelf && (
               <Button onClick={handleSayHello} className="w-full" size="lg">
                 <Hand className="mr-2 h-4 w-4" />
-                Say Hello 👋
+                Wave Hello 👋
               </Button>
+            )}
+            {!currentUser && (
+              <p className="text-center text-xs text-muted-foreground">
+                Sign in to wave hello.
+              </p>
             )}
 
             <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground border-t border-border/40 pt-6">
